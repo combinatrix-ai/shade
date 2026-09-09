@@ -26,7 +26,7 @@ final class PhysicalActivity {
     }
 
     func suppressDimmingGesture() {
-        tracker.suppress(until: ProcessInfo.processInfo.systemUptime + 1)
+        tracker.suppress(until: ProcessInfo.processInfo.systemUptime + 2)
     }
 
     func stop() {

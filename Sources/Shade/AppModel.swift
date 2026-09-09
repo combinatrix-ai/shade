@@ -105,8 +105,9 @@ final class AppModel: ObservableObject {
                 try activity.start()
                 try awake.start()
             }
-            enabledAt = Date()
-            session.enable(now: Date(), delay: delay)
+            now = Date()
+            enabledAt = now
+            session.enable(now: now, delay: delay)
         } catch { self.error = error.localizedDescription; awake.stop(); activity.stop() }
     }
 
@@ -128,7 +129,8 @@ final class AppModel: ObservableObject {
     }
 
     func reserve() {
-        session.reserve(now: Date(), delay: delay)
+        now = Date()
+        session.reserve(now: now, delay: delay)
     }
 
     private func reserveIfPending() {
@@ -173,7 +175,8 @@ final class AppModel: ObservableObject {
                 self.snapshot = nil
             } catch { self.error = "Could not restore brightness. Use your brightness keys.\n" + error.localizedDescription; return false }
         }
-        session.didRestore(now: Date(), delay: delay)
+        now = Date()
+        session.didRestore(now: now, delay: delay)
         return true
     }
 

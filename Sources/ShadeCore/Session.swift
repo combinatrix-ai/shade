@@ -7,12 +7,14 @@ public enum Phase: Equatable { case off, pending(deadline: Date), dark }
 /// State transitions are committed only after the associated system operation succeeds.
 public struct Session {
     public private(set) var phase: Phase = .off
+    private var countdownDuration: TimeInterval = 0
     public init() {}
     public var isOn: Bool {
         phase != .off
     }
 
     public mutating func enable(now: Date, delay: TimeInterval) {
+        countdownDuration = delay
         phase = .pending(deadline: now.addingTimeInterval(delay))
     }
 
@@ -22,6 +24,7 @@ public struct Session {
 
     public mutating func reserve(now: Date, delay: TimeInterval) {
         guard isOn, phase != .dark else { return }
+        countdownDuration = delay
         phase = .pending(deadline: now.addingTimeInterval(delay))
     }
 
@@ -49,13 +52,14 @@ public struct Session {
 
     public mutating func didRestore(now: Date, delay: TimeInterval) {
         if phase == .dark {
+            countdownDuration = delay
             phase = .pending(deadline: now.addingTimeInterval(delay))
         }
     }
 
     public func remaining(now: Date) -> Int {
         if case let .pending(deadline) = phase {
-            return max(0, Int(ceil(deadline.timeIntervalSince(now))))
+            return max(0, Int(ceil(min(countdownDuration, deadline.timeIntervalSince(now)))))
         }
         return 0
     }
