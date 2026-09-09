@@ -8,7 +8,7 @@
 - Normal UI interaction while dark: another app could be opened and clicked; brightness remained zero.
 - Restore button: brightness returned to the exact saved value; auto-brightness returned to its prior enabled state. Wake prevention remained active.
 - Crash recovery: killed only the Shade parent during a dark session. The restore guard restored brightness to the saved value; the parent's wake assertions were lifetime-bound.
-- Input Monitoring: explicitly approved by the user and worked in the initial ad-hoc build after authentication and restart. A later rebuild invalidated that grant. The final build uses a stable development certificate, but macOS is still holding the old permission registration; replacing that registration is awaiting OS authentication. Do not treat the final build as having a working Shift event tap yet.
+- Input Monitoring: explicitly approved by the user and worked in the initial ad-hoc build after authentication and restart. A later rebuild invalidated that grant. The final build uses a stable development certificate. Removing only the old Shade registration, re-adding the signed app through the macOS file picker, and restarting resolved the stale grant. The final build now starts its Shift event tap without a permission error. Physical hold activation is still awaiting confirmation.
 
 ## Remaining physical acceptance
 
