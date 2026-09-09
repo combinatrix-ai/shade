@@ -13,3 +13,12 @@
 ## Remaining physical acceptance
 
 The user's physical both-Shift hold and custom shortcut activation have not yet been confirmed. Computer Use's app-directed synthesized custom keystroke did not activate the global Carbon hot key; this does not establish whether a physical keystroke works. Unit tests cover the hold state machine, not physical delivery. Login-item launch, lid transitions, and other hardware are not claimed as tested.
+
+## Recorder and freeze fix (2026-09-09, follow-up)
+
+- Replaced the Shift/custom mode selector with one recorder field. The default is Control+Option+Command+D; no Input Monitoring APIs remain in the app.
+- A sample of the unresponsive process located its main thread in `AppModel.restore -> RestoreGuard.finish -> Process.waitUntilExit`. The user-requested frozen process was killed before editing.
+- Normal restore now sends an explicit disarm byte and never waits for child termination on the UI thread. Startup acknowledgment has a three-second timeout. The child still restores brightness on parent pipe EOF.
+- `scripts/check.sh` passes two session tests and 20 real child disarm/exit cycles without changing the display. The removed Shift tests are no longer applicable.
+- Live UI: default shortcut registered, recorder opened and canceled; two dim/restore cycles completed without blocking and the app could be turned off afterward.
+- The panel now hides on outside mouse events, application deactivation, and key-window resignation. Escape is handled by the local key monitor and panel cancel action. CUA's app-directed Escape did not yield an observable dismissal, so physical outside-click/Escape acceptance remains to be confirmed rather than inferred from code.

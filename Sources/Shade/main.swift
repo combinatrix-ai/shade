@@ -2,13 +2,27 @@ import AppKit
 import Combine
 import SwiftUI
 
+signal(SIGPIPE, SIG_IGN)
+
 if CommandLine.arguments.contains("--restore-guard") {
     runRestoreGuard()
 }
 
-final class AppDelegate: NSObject, NSApplicationDelegate {
+final class MenuPanel: NSPanel {
+    override var canBecomeKey: Bool {
+        true
+    }
+
+    override func cancelOperation(_ sender: Any?) {
+        orderOut(sender)
+    }
+}
+
+final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var item: NSStatusItem!
     private var panelWindow: NSPanel?
+    private var outsideMonitor: Any?
+    private var escapeMonitor: Any?
     private var settingsWindow: NSWindow?
     private var demoWindow: NSWindow?
     private var subscriptions = Set<AnyCancellable>()
@@ -39,16 +53,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     @objc private func togglePanel() {
         if panelWindow?.isVisible == true {
-            panelWindow?.orderOut(nil); return
+            hidePanel(); return
         }
         if panelWindow == nil {
-            let panel = NSPanel(contentViewController: NSHostingController(rootView: PanelView(model: model, settings: { [weak self] in self?.showSettings() }, quit: { NSApp.terminate(nil) })))
+            let panel = MenuPanel(contentViewController: NSHostingController(rootView: PanelView(model: model, settings: { [weak self] in self?.showSettings() }, quit: { NSApp.terminate(nil) })))
             panel.title = "Shade"
             panel.styleMask = [.titled, .fullSizeContentView]
             panel.titleVisibility = .hidden
             panel.titlebarAppearsTransparent = true
             panel.isFloatingPanel = true
-            panel.hidesOnDeactivate = false
+            panel.hidesOnDeactivate = true
+            panel.delegate = self
             panel.isReleasedWhenClosed = false
             panel.level = .floating
             panelWindow = panel
@@ -58,12 +73,41 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             let iconX = item.button?.window?.frame.midX ?? bounds.maxX - 200
             panel.setFrameOrigin(NSPoint(x: min(max(iconX - panel.frame.width / 2, bounds.minX + 12), bounds.maxX - panel.frame.width - 12), y: bounds.maxY - panel.frame.height - 8))
         }
+        if outsideMonitor == nil {
+            outsideMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in self?.hidePanel() }
+            escapeMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+                if event.keyCode == 53, self?.panelWindow?.isVisible == true {
+                    self?.hidePanel(); return nil
+                }
+                return event
+            }
+        }
         panelWindow?.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
     }
 
-    private func showSettings() {
+    private func hidePanel() {
         panelWindow?.orderOut(nil)
+        if let outsideMonitor {
+            NSEvent.removeMonitor(outsideMonitor)
+        }; outsideMonitor = nil
+        if let escapeMonitor {
+            NSEvent.removeMonitor(escapeMonitor)
+        }; escapeMonitor = nil
+    }
+
+    func windowDidResignKey(_ notification: Notification) {
+        if notification.object as? NSWindow === panelWindow {
+            hidePanel()
+        }
+    }
+
+    func applicationDidResignActive(_: Notification) {
+        hidePanel()
+    }
+
+    private func showSettings() {
+        hidePanel()
         if settingsWindow == nil {
             let window = NSWindow(contentViewController: NSHostingController(rootView: SettingsView(model: model, showPanel: { [weak self] in self?.settingsWindow?.orderOut(nil); self?.togglePanel() })))
             window.title = "Shade の設定"

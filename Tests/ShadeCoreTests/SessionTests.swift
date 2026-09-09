@@ -22,24 +22,4 @@ final class SessionTests: XCTestCase {
         s.disable(); s.didDim(); s.reserve(now: now, delay: 60)
         XCTAssertEqual(s.phase, .off)
     }
-
-    func testHoldRequiresBothAndReleaseRearms() {
-        var h = ShiftHold()
-        h.update(left: true, right: false, now: 0)
-        XCTAssertFalse(h.poll(now: 10))
-        h.update(left: true, right: true, now: 10)
-        XCTAssertFalse(h.poll(now: 10.99))
-        XCTAssertTrue(h.poll(now: 11))
-        XCTAssertFalse(h.poll(now: 20))
-        h.update(left: false, right: true, now: 21)
-        h.update(left: true, right: true, now: 22)
-        XCTAssertTrue(h.poll(now: 23))
-    }
-
-    func testInterruptedHoldNeverFires() {
-        var h = ShiftHold()
-        h.update(left: true, right: true, now: 0)
-        h.update(left: true, right: false, now: 0.9)
-        XCTAssertFalse(h.poll(now: 1.1))
-    }
 }

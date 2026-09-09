@@ -49,29 +49,3 @@ public struct Session {
         return 0
     }
 }
-
-/// Requires both physical Shift flags continuously, fires once until either is released.
-public struct ShiftHold {
-    private var began: TimeInterval?
-    private var fired = false
-    public init() {}
-    public mutating func update(left: Bool, right: Bool, now: TimeInterval) {
-        if left, right {
-            if began == nil {
-                began = now
-            }
-        } else {
-            reset()
-        }
-    }
-
-    public mutating func poll(now: TimeInterval) -> Bool {
-        guard let began, !fired, now - began >= 1 else { return false }
-        fired = true
-        return true
-    }
-
-    public mutating func reset() {
-        began = nil; fired = false
-    }
-}

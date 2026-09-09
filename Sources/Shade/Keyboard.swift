@@ -1,8 +1,8 @@
 import AppKit
 import Carbon
-import ShadeCore
 
 struct Shortcut: Codable, Equatable {
+    static let initial = Shortcut(keyCode: UInt16(kVK_ANSI_D), modifiers: UInt32(controlKey | optionKey | cmdKey), label: "⌃⌥⌘D")
     var keyCode: UInt16
     var modifiers: UInt32
     var label: String
@@ -30,52 +30,15 @@ struct Shortcut: Codable, Equatable {
 
 final class KeyboardListener {
     var action: (() -> Void)?
-    private var tap: CFMachPort?
-    private var source: CFRunLoopSource?
-    private var timer: Timer?
-    private var hold = ShiftHold()
     private var hotKey: EventHotKeyRef?
     private var handler: EventHandlerRef?
     var ready: Bool {
-        if hotKey != nil {
-            return true
-        }
-        guard let tap else { return false }
-        return CGPreflightListenEventAccess() && CGEvent.tapIsEnabled(tap: tap)
+        hotKey != nil
     }
 
-    func configure(custom: Shortcut?) -> String? {
+    func configure(shortcut: Shortcut) -> String? {
         stop()
-        if let custom {
-            return register(custom)
-        }
-        guard CGPreflightListenEventAccess() else { return "左右Shiftの検出には「入力監視」の許可が必要です。" }
-        let mask = CGEventMask(1 << CGEventType.flagsChanged.rawValue)
-        tap = CGEvent.tapCreate(tap: .cgSessionEventTap, place: .headInsertEventTap, options: .listenOnly, eventsOfInterest: mask, callback: { _, type, event, context in
-            guard let context else { return Unmanaged.passUnretained(event) }
-            let listener = Unmanaged<KeyboardListener>.fromOpaque(context).takeUnretainedValue()
-            if type == .tapDisabledByTimeout || type == .tapDisabledByUserInput {
-                listener.hold.reset()
-                if let tap = listener.tap {
-                    CGEvent.tapEnable(tap: tap, enable: true)
-                }
-            } else {
-                let flags = event.flags.rawValue
-                listener.hold.update(left: flags & 0x2 != 0, right: flags & 0x4 != 0, now: ProcessInfo.processInfo.systemUptime)
-            }
-            return Unmanaged.passUnretained(event)
-        }, userInfo: Unmanaged.passUnretained(self).toOpaque())
-        guard let tap else { return "キーボードの監視を開始できません。入力監視の許可を確認してください。" }
-        source = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, tap, 0)
-        CFRunLoopAddSource(CFRunLoopGetMain(), source, .commonModes)
-        CGEvent.tapEnable(tap: tap, enable: true)
-        timer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { [weak self] _ in
-            guard let self else { return }
-            if hold.poll(now: ProcessInfo.processInfo.systemUptime) {
-                action?()
-            }
-        }
-        return nil
+        return register(shortcut)
     }
 
     private func register(_ shortcut: Shortcut) -> String? {
@@ -93,14 +56,6 @@ final class KeyboardListener {
     }
 
     func stop() {
-        timer?.invalidate(); timer = nil; hold.reset()
-        if let source {
-            CFRunLoopRemoveSource(CFRunLoopGetMain(), source, .commonModes)
-        }
-        if let tap {
-            CFMachPortInvalidate(tap)
-        }
-        source = nil; tap = nil
         if let hotKey {
             UnregisterEventHotKey(hotKey)
         }; hotKey = nil

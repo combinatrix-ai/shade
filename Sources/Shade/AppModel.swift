@@ -12,15 +12,10 @@ final class AppModel: ObservableObject {
         didSet { UserDefaults.standard.set(delay, forKey: "delay"); reserveIfPending() }
     }
 
-    @Published var customMode: Bool {
-        didSet { UserDefaults.standard.set(customMode, forKey: "customMode"); configureKeyboard() }
-    }
-
-    @Published var shortcut: Shortcut? {
+    @Published var shortcut: Shortcut {
         didSet {
-            if let shortcut {
-                UserDefaults.standard.set(try? JSONEncoder().encode(shortcut), forKey: "shortcut")
-            }; configureKeyboard()
+            UserDefaults.standard.set(try? JSONEncoder().encode(shortcut), forKey: "hotkey")
+            configureKeyboard()
         }
     }
 
@@ -40,10 +35,7 @@ final class AppModel: ObservableObject {
         self.demo = demo
         let savedDelay = UserDefaults.standard.double(forKey: "delay")
         delay = [30.0, 60, 180, 300].contains(savedDelay) ? savedDelay : 60
-        customMode = UserDefaults.standard.bool(forKey: "customMode")
-        if let data = UserDefaults.standard.data(forKey: "shortcut") {
-            shortcut = try? JSONDecoder().decode(Shortcut.self, from: data)
-        }
+        shortcut = UserDefaults.standard.data(forKey: "hotkey").flatMap { try? JSONDecoder().decode(Shortcut.self, from: $0) } ?? .initial
         keyboard.action = { [weak self] in guard self?.recording == false else { return }; self?.shortcutAction() }
         configureKeyboard()
         loginEnabled = SMAppService.mainApp.status == .enabled
@@ -65,7 +57,7 @@ final class AppModel: ObservableObject {
     }
 
     var keyLabel: String {
-        customMode ? (shortcut?.label ?? "未設定") : "左 ⇧ ＋ 右 ⇧ · 1秒"
+        shortcut.label
     }
 
     var title: String {
@@ -175,23 +167,10 @@ final class AppModel: ObservableObject {
         if isDark, !restore() {
             return
         }
-        if customMode, shortcut == nil {
-            keyboard.stop(); keyboardIssue = "クリックしてショートカットを記録してください。"
-        } else {
-            keyboardIssue = keyboard.configure(custom: customMode ? shortcut : nil)
-        }
+        keyboardIssue = keyboard.configure(shortcut: shortcut)
         if keyboardIssue != nil, isOn {
             disable()
         }
-    }
-
-    func openInputSettings() {
-        NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_ListenEvent")!)
-    }
-
-    func requestInputPermission() {
-        CGRequestListenEventAccess()
-        configureKeyboard()
     }
 
     func setLogin(_ enabled: Bool) {

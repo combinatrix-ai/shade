@@ -70,37 +70,19 @@ struct SettingsView: View {
             section("キーボード")
             group {
                 row("画面を戻す／暗転を予約") {
-                    Picker("キー操作", selection: $model.customMode) {
-                        Text("左右Shiftを長押し").tag(false)
-                        Text("カスタムショートカット").tag(true)
-                    }.labelsHidden().frame(width: 192)
+                    Button(model.recording ? "キーを押してください…" : model.shortcut.label) { beginRecording() }
+                        .frame(minWidth: 170).controlSize(.large)
+                        .accessibilityLabel("ショートカットを記録")
                 }
-                Divider()
-                HStack {
-                    if model.customMode {
-                        Button(model.recording ? "キーを押してください…" : model.shortcut?.label ?? "クリックして記録") { beginRecording() }
-                            .frame(minWidth: 170).controlSize(.large)
-                        Spacer()
-                        if model.recording {
-                            Button("キャンセル") { endRecording() }.font(.system(size: 11))
-                        }
-                    } else {
-                        keycap("⇧"); Text("左 ＋ 右").font(.system(size: 11)).foregroundStyle(.secondary); keycap("⇧")
-                        Spacer(); Text("同時に1秒長押し").font(.system(size: 11)).foregroundStyle(.secondary)
-                    }
-                }.frame(minHeight: 48)
+                if model.recording {
+                    HStack { Text("⌘・⌃・⌥を含む組み合わせを入力").font(.caption).foregroundStyle(.secondary); Spacer(); Button("キャンセル") { endRecording() } }.padding(.bottom, 12)
+                }
             }
             help("暗転中はすぐに表示。表示中は暗転を予約します。\nマウスを動かしたり、通常のキー入力をしても画面は戻りません。")
             if let issue = model.keyboardIssue {
                 VStack(alignment: .leading, spacing: 10) {
                     Label(issue, systemImage: "keyboard").font(.system(size: 12)).fixedSize(horizontal: false, vertical: true)
-                    if !model.customMode {
-                        HStack {
-                            Button("入力監視を許可…") { model.requestInputPermission() }
-                            Button("システム設定を開く") { model.openInputSettings() }
-                            Button("再確認") { model.configureKeyboard() }
-                        }.controlSize(.small)
-                    }
+
                 }.padding(12).frame(maxWidth: .infinity, alignment: .leading).background(Color.orange.opacity(0.08), in: RoundedRectangle(cornerRadius: 8)).padding(.bottom, 22)
             }
             section("起動と終了")
@@ -120,7 +102,6 @@ struct SettingsView: View {
         }.font(.system(size: 13)).padding(28).frame(width: 554)
             .background(Color(nsColor: .windowBackgroundColor))
             .onDisappear { endRecording() }
-            .onChange(of: model.customMode) { _, _ in endRecording() }
     }
 
     private func section(_ title: String) -> some View {
@@ -129,10 +110,6 @@ struct SettingsView: View {
 
     private func help(_ text: String) -> some View {
         Text(text).font(.system(size: 11)).foregroundStyle(.secondary).lineSpacing(3).fixedSize(horizontal: false, vertical: true).padding(.top, 8).padding(.bottom, 22)
-    }
-
-    private func keycap(_ text: String) -> some View {
-        Text(text).font(.system(size: 18)).padding(.horizontal, 14).padding(.vertical, 5).background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: 5)).overlay(RoundedRectangle(cornerRadius: 5).strokeBorder(.gray.opacity(0.25)))
     }
 
     private func group(@ViewBuilder content: () -> some View) -> some View {

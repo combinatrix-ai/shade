@@ -97,6 +97,14 @@ final class RestoreGuard {
         p.standardOutput = ready
         try p.run()
         // Child confirms that it has loaded the brightness API before we dim.
+        var descriptor = pollfd(fd: ready.fileHandleForReading.fileDescriptor, events: Int16(POLLIN), revents: 0)
+        guard poll(&descriptor, 1, 3000) > 0 else {
+            try? input.fileHandleForWriting.close()
+            if p.isRunning {
+                p.terminate()
+            }
+            throw ShadeFailure(message: "画面の復帰準備がタイムアウトしました。")
+        }
         let ack = ready.fileHandleForReading.readData(ofLength: 1)
         guard ack == Data([1]) else {
             try? input.fileHandleForWriting.close()
@@ -106,9 +114,14 @@ final class RestoreGuard {
     }
 
     func finish() {
-        try? pipe?.fileHandleForWriting.close()
-        process?.waitUntilExit()
+        // The parent already restored brightness. Disarm the child explicitly.
+        // Never spin the main run loop waiting for a child: timers can reenter restore().
+        let input = pipe
         pipe = nil; process = nil
+        if let input {
+            try? input.fileHandleForWriting.write(contentsOf: Data([0x43]))
+            try? input.fileHandleForWriting.close()
+        }
     }
 
     deinit { finish() }
@@ -120,7 +133,10 @@ func runRestoreGuard() -> Never {
           let original = Float(CommandLine.arguments[3]), original.isFinite, (0 ... 1).contains(original),
           let brightness = try? Brightness() else { exit(1) }
     FileHandle.standardOutput.write(Data([1]))
-    _ = FileHandle.standardInput.readDataToEndOfFile()
+    let command = FileHandle.standardInput.readData(ofLength: 1)
+    if command == Data([0x43]) {
+        exit(0)
+    }
     for _ in 0 ..< 5 {
         if (try? brightness.set(display, original)) != nil {
             exit(0)
