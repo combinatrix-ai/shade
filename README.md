@@ -25,9 +25,17 @@ We expect this kind of separation between an agent's working session and the phy
 - Turning off or quitting restores the brightness and releases this app's wake assertions. Sessions end after a maximum of 8 hours. Manual sleep or switching away from the user session ends the session.
 - Screen-lock preferences are never changed. An already locked Mac is not unlocked.
 
+## Install and update
+
+Download [Shade.dmg](https://github.com/combinatrix-ai/shade/releases/latest/download/Shade.dmg), drag Shade into Applications, and open it. Requires Apple Silicon and macOS 14 or later. The tutorial explains recovery; Shade starts off. Check “Don’t show on startup” to dismiss the tutorial on future launches.
+
+Releases use Developer ID signing and notarization. Sparkle checks for updates; use Settings → Check for Updates… for a manual check. See [release requirements](docs/releasing.md). The first public version has no prior public version for an upgrade E2E; verify version-to-version replacement at the next release.
+
+Preferences stay in macOS UserDefaults under `ai.combinatrix.shade`. Shade reads elapsed hardware idle time, not input contents. Update checks contact GitHub. See [privacy](https://shade.combinatrix.ai/privacy.html) and [support](https://github.com/combinatrix-ai/shade/issues).
+
 ## Build and run
 
-Requires macOS 14+, Xcode command-line tools, and Swift 6. No third-party dependencies.
+Requires macOS 14+, Xcode command-line tools, and Swift 6. Sparkle is pinned through Swift Package Manager for signed updates.
 
 ```sh
 ./scripts/check.sh
@@ -38,7 +46,7 @@ open build/Shade.app
 
 Shortcuts use Carbon hot-key registration and do not need Input Monitoring. Shade does not record or transmit keyboard events. If another app already owns a combination, Shade reports registration failure and does not dim.
 
-The default setting opens the app with wake prevention off. Login launch is opt-in. The menu panel can also be opened from settings or by reopening Shade.
+The default setting opens the app with wake prevention off. Login launch is opt-in. Settings and the tutorial open inside the same menu panel. Reopen Shade or single-click the status icon to show it.
 
 ```sh
 open build/Shade.app --args --demo
@@ -60,6 +68,6 @@ Dimming is not a security boundary; anyone can restore the display. Only the bui
 
 See [docs/verification.md](docs/verification.md) for the measured local results and remaining physical checks. Use a stable signing certificate for ongoing distribution.
 
-The original mock in `docs/mock.html` is historical: the keyboard selector was subsequently replaced with a single recorder field. `scripts/test-restore-guard.py` runs 20 real companion-process disarm cycles without changing the display.
+The accepted UI mock is preserved in `docs/mock.html`. `scripts/test-restore-guard.py` runs 20 real companion-process disarm cycles without changing the display.
 
 Hardware activity is read from IOHIDSystem’s `HIDIdleTime`; no key contents or pointer coordinates are collected and no Input Monitoring permission is required. In local measurement, Computer Use clicks did not reset this counter. This is a best-effort distinction, not a guarantee for every automation tool or virtual HID driver. If the counter cannot be read, Shade stops and restores the display.
