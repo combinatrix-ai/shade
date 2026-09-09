@@ -4,7 +4,7 @@ A small macOS menu bar app that keeps the Mac awake while dimming only the built
 
 ## Behavior
 
-- Starts off. Turn it on from the menu bar panel.
+- Starts off. Double-click or right-click the menu bar icon to toggle wake prevention. A single click opens the panel after the system double-click interval.
 - After 1 minute (configurable: 30 seconds, 1, 3, or 5 minutes), sets the built-in display's brightness to zero.
 - Press **Control + Option + Command + D** to restore the saved brightness. Keeping the Mac awake continues.
 - Perform the same action while the display is visible to schedule dimming again. Ordinary typing and pointer movement do not restore the brightness.

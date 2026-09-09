@@ -21,6 +21,7 @@ final class MenuPanel: NSPanel {
 final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var item: NSStatusItem!
     private var panelWindow: NSPanel?
+    private var pendingIconClick: DispatchWorkItem?
     private var outsideMonitor: Any?
     private var escapeMonitor: Any?
     private var settingsWindow: NSWindow?
@@ -36,7 +37,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         NSApp.setActivationPolicy(.accessory)
         item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         item.button?.image = NSImage(systemSymbolName: "circle.lefthalf.filled", accessibilityDescription: "Shade")
-        item.button?.target = self; item.button?.action = #selector(togglePanel)
+        item.button?.target = self; item.button?.action = #selector(handleIconClick)
+        item.button?.sendAction(on: [.leftMouseUp, .rightMouseUp])
         item.button?.toolTip = "Shade · オフ"
         model.$session.sink { [weak self] session in
             self?.item.button?.appearsDisabled = !session.isOn
@@ -49,6 +51,25 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         } else {
             showSettings()
         }
+    }
+
+    @objc private func handleIconClick() {
+        pendingIconClick?.cancel()
+        pendingIconClick = nil
+        guard let event = NSApp.currentEvent else { togglePanel(); return }
+        if event.type == .rightMouseUp || event.clickCount == 2 {
+            hidePanel()
+            model.toggle()
+            return
+        }
+        guard event.clickCount <= 1 else { return }
+        // Defer the single click so a double click never briefly opens the panel.
+        let action = DispatchWorkItem { [weak self] in
+            self?.pendingIconClick = nil
+            self?.togglePanel()
+        }
+        pendingIconClick = action
+        DispatchQueue.main.asyncAfter(deadline: .now() + NSEvent.doubleClickInterval, execute: action)
     }
 
     @objc private func togglePanel() {
@@ -121,6 +142,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     }
 
     func applicationWillTerminate(_: Notification) {
+        pendingIconClick?.cancel()
         model.shutdown()
     }
 
