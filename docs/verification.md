@@ -30,4 +30,13 @@ The user's physical both-Shift hold and custom shortcut activation have not yet 
 - Local read-only probe: the counter continued increasing through Computer Use clicks and reset on physical activity. This is not guaranteed for virtual HID drivers or all remote-control tools.
 - Native app: Dim Now reached Display dimmed; Restore Display returned directly to Dimming in 1:00, counted down to 0:32, and automatically reached Display dimmed again. Turning Shade off restored brightness and reached Off / Ready to dim.
 - Core regression checks cover automatic restore deadlines, activity rescheduling, dark input staying dark, and off-state restoration.
-- Wake on touch remains a mock-only proposal. This change does not add trackpad-contact detection.
+- At the auto-dim checkpoint, Wake on touch was still a mock-only proposal; see the next section for the subsequent implementation.
+
+
+## Wake on touch
+
+- Opt-in, defaults off, saved in UserDefaults. Reuses the hardware idle counter without collecting input contents or requesting new permissions.
+- Physical activity while dark restores the saved brightness and automatically rearms the configured delay. Trackpad movement, mouse input, and keyboard input count; a stationary finger alone is not detected.
+- Activity preceding Dim Now is consumed before dimming, so that action does not cause an immediate wake.
+- Four core tests pass, including opt-in/off behavior, no-activity behavior, and rearming. The release build and 20 restore-guard cycles pass.
+- Native UI confirmed default off, toggling on, and reaching Display dimmed with the setting enabled. After requesting physical trackpad movement, native UI changed from Display dimmed to Dimming in 1:00 without an agent restore action. Visual confirmation from the user was pending at this checkpoint.

@@ -70,6 +70,12 @@ struct SettingsView: View {
                     }.padding(.bottom, 12)
                 }
                 Divider()
+                row("Wake on touch") {
+                    Toggle("Wake on touch", isOn: $model.wakeOnTouch)
+                        .labelsHidden().toggleStyle(.switch).controlSize(.small)
+                        .help("Restore on physical trackpad movement, mouse or keyboard input. Resting a finger alone is not detected.")
+                }
+                Divider()
                 row("Launch at login") {
                     Toggle("Launch at login", isOn: Binding(get: { model.loginEnabled }, set: { model.setLogin($0) })).labelsHidden().toggleStyle(.switch).controlSize(.small)
                 }

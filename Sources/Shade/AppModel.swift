@@ -19,6 +19,10 @@ final class AppModel: ObservableObject {
         }
     }
 
+    @Published var wakeOnTouch: Bool {
+        didSet { UserDefaults.standard.set(wakeOnTouch, forKey: "wakeOnTouch") }
+    }
+
     @Published var recording = false
     @Published var loginEnabled = false
     private let awake = AwakeHold()
@@ -34,6 +38,7 @@ final class AppModel: ObservableObject {
 
     init(demo: Bool = false) {
         self.demo = demo
+        wakeOnTouch = UserDefaults.standard.bool(forKey: "wakeOnTouch")
         let savedDelay = UserDefaults.standard.double(forKey: "delay")
         delay = [30.0, 60, 180, 300].contains(savedDelay) ? savedDelay : 60
         shortcut = UserDefaults.standard.data(forKey: "hotkey").flatMap { try? JSONDecoder().decode(Shortcut.self, from: $0) } ?? .initial
@@ -136,6 +141,11 @@ final class AppModel: ObservableObject {
             let guardian = RestoreGuard()
             try guardian.start(display: id, brightness: original)
             snapshot = (id, original); restoreGuard = guardian
+            // Consume activity preceding Dim Now so the click that dimmed the
+            // display cannot be mistaken for a subsequent wake gesture.
+            guard activity.sample() != nil else {
+                throw ShadeFailure(message: "Hardware activity detection is unavailable.")
+            }
             try brightness.set(id, 0)
             session.didDim()
         } catch { self.error = error.localizedDescription; disable() }
@@ -195,8 +205,11 @@ final class AppModel: ObservableObject {
                 disable()
                 return
             }
-            if active, !isDark {
-                reserve()
+            switch session.activityResponse(detected: active, wakeOnTouch: wakeOnTouch) {
+            case .none: break
+            case .postpone: reserve()
+            case .restore:
+                guard restore() else { return }
             }
             // A brightness-key escape restores the screen outside Shade. Adopt that
             // brightness and re-arm auto dim without overwriting the user's choice.

@@ -19,7 +19,7 @@ We expect this kind of separation between an agent's working session and the phy
 - Starts off. Double-click or right-click the menu bar icon to toggle wake prevention. A single click opens the panel after the system double-click interval.
 - After 1 minute without hardware input (configurable: 30 seconds, 1, 3, or 5 minutes), sets the built-in display's brightness to zero. Physical keyboard and pointer activity postpone dimming while the display is visible.
 - Press **Control + Option + Command + D** to restore the saved brightness. Keeping the Mac awake continues.
-- Restoring the display automatically starts a fresh dimming countdown. The shortcut restarts that countdown while visible. The brightness-up key also returns to automatic dimming, preserving the brightness you chose. Ordinary typing and pointer movement do not restore the brightness; Wake on touch remains a UI proposal.
+- Restoring the display automatically starts a fresh dimming countdown. The shortcut restarts that countdown while visible. The brightness-up key also returns to automatic dimming, preserving the brightness you chose. With **Wake on touch** enabled, physical trackpad movement, mouse activity, or typing restores the display and starts a fresh countdown. It defaults off; resting a finger without generating input is not detected.
 - Click the shortcut field and press a new combination with Command, Control, or Option to replace it. Escape cancels recording.
 - The menu panel closes on an outside click, app switch, or Escape.
 - Turning off or quitting restores the brightness and releases this app's wake assertions. Sessions end after a maximum of 8 hours. Manual sleep or switching away from the user session ends the session.

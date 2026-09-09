@@ -34,4 +34,18 @@ final class SessionTests: XCTestCase {
         XCTAssertEqual(s.phase, .dark)
         XCTAssertFalse(s.isDue(now: now.addingTimeInterval(200)))
     }
+
+    func testWakeRequiresPhysicalActivityAndOptIn() {
+        var s = Session()
+        XCTAssertEqual(s.activityResponse(detected: true, wakeOnTouch: true), .none)
+        s.enable(now: now, delay: 60)
+        XCTAssertEqual(s.activityResponse(detected: true, wakeOnTouch: false), .postpone)
+        s.didDim()
+        XCTAssertEqual(s.activityResponse(detected: false, wakeOnTouch: true), .none)
+        XCTAssertEqual(s.activityResponse(detected: true, wakeOnTouch: false), .none)
+        XCTAssertEqual(s.activityResponse(detected: true, wakeOnTouch: true), .restore)
+        s.didRestore(now: now.addingTimeInterval(90), delay: 60)
+        XCTAssertEqual(s.remaining(now: now.addingTimeInterval(90)), 60)
+        XCTAssertTrue(s.isDue(now: now.addingTimeInterval(150)))
+    }
 }

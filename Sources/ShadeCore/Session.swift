@@ -1,5 +1,7 @@
 import Foundation
 
+public enum ActivityResponse { case none, postpone, restore }
+
 public enum Phase: Equatable { case off, pending(deadline: Date), dark }
 
 /// State transitions are committed only after the associated system operation succeeds.
@@ -21,6 +23,15 @@ public struct Session {
     public mutating func reserve(now: Date, delay: TimeInterval) {
         guard isOn, phase != .dark else { return }
         phase = .pending(deadline: now.addingTimeInterval(delay))
+    }
+
+    public func activityResponse(detected: Bool, wakeOnTouch: Bool) -> ActivityResponse {
+        guard detected else { return .none }
+        switch phase {
+        case .off: return .none
+        case .pending: return .postpone
+        case .dark: return wakeOnTouch ? .restore : .none
+        }
     }
 
     public func isDue(now: Date) -> Bool {
