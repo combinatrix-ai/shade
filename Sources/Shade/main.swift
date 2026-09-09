@@ -1,5 +1,6 @@
 import AppKit
 import Combine
+import Sparkle
 import SwiftUI
 
 signal(SIGPIPE, SIG_IGN)
@@ -24,13 +25,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var pendingIconClick: DispatchWorkItem?
     private var outsideMonitor: Any?
     private var escapeMonitor: Any?
-    private var settingsWindow: NSWindow?
+    private var updater: SPUStandardUpdaterController?
     private var demoWindow: NSWindow?
     private var subscriptions = Set<AnyCancellable>()
     private lazy var model = AppModel(demo: CommandLine.arguments.contains("--demo"))
 
     func applicationDidFinishLaunching(_: Notification) {
-        let id = Bundle.main.bundleIdentifier ?? "app.hmirin.shade"
+        let id = Bundle.main.bundleIdentifier ?? "ai.combinatrix.shade"
         if NSRunningApplication.runningApplications(withBundleIdentifier: id).contains(where: { $0.processIdentifier != getpid() }) {
             NSApplication.shared.terminate(nil); return
         }
@@ -44,12 +45,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             self?.item.button?.appearsDisabled = !session.isOn
             self?.item.button?.toolTip = session.isOn ? "Shade · Keeping Mac awake" : "Shade · Off"
         }.store(in: &subscriptions)
+        if !model.demo, Bundle.main.object(forInfoDictionaryKey: "SUPublicEDKey") != nil {
+            updater = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil)
+        }
         if CommandLine.arguments.contains("--demo") {
-            let window = NSWindow(contentViewController: NSHostingController(rootView: PanelView(model: model, settings: { [weak self] in self?.showSettings() }, quit: { NSApp.terminate(nil) })))
+            let window = NSWindow(contentViewController: NSHostingController(rootView: PanelRoot(model: model, checkUpdates: { [weak self] in self?.updater?.checkForUpdates(nil) })))
             window.title = "Shade · Preview"; window.styleMask = [.titled, .closable]; window.center(); window.makeKeyAndOrderFront(nil); demoWindow = window
             NSApp.activate(ignoringOtherApps: true)
         } else {
-            showSettings()
+            togglePanel()
         }
     }
 
@@ -77,7 +81,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             hidePanel(); return
         }
         if panelWindow == nil {
-            let panel = MenuPanel(contentViewController: NSHostingController(rootView: PanelView(model: model, settings: { [weak self] in self?.showSettings() }, quit: { NSApp.terminate(nil) })))
+            let panel = MenuPanel(contentViewController: NSHostingController(rootView: PanelRoot(model: model, checkUpdates: { [weak self] in self?.updater?.checkForUpdates(nil) })))
             panel.title = "Shade"
             panel.styleMask = [.titled, .fullSizeContentView]
             panel.titleVisibility = .hidden
@@ -125,20 +129,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
     func applicationDidResignActive(_: Notification) {
         hidePanel()
-    }
-
-    private func showSettings() {
-        hidePanel()
-        if settingsWindow == nil {
-            let window = NSWindow(contentViewController: NSHostingController(rootView: SettingsView(model: model, showPanel: { [weak self] in self?.settingsWindow?.orderOut(nil); self?.togglePanel() })))
-            window.title = "Shade Settings"
-            window.styleMask = [.titled, .closable, .miniaturizable]
-            window.isReleasedWhenClosed = false
-            window.center()
-            settingsWindow = window
-        }
-        settingsWindow?.makeKeyAndOrderFront(nil)
-        NSApp.activate(ignoringOtherApps: true)
     }
 
     func applicationWillTerminate(_: Notification) {

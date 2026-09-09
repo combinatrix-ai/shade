@@ -5,3 +5,10 @@ build/
 .env*
 
 .signing-identity
+
+dist/
+*.p12
+*.p8
+*.key
+__pycache__/
+*.pyc

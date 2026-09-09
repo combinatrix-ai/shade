@@ -8,6 +8,7 @@ struct PanelView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack {
+                Image(systemName: "circle.lefthalf.filled").foregroundStyle(.green)
                 Text("Shade").font(.system(size: 17, weight: .semibold))
                 Spacer()
                 Toggle("Shade", isOn: Binding(get: { model.isOn }, set: { _ in model.toggle() }))
@@ -29,26 +30,32 @@ struct PanelView: View {
             }
             Button(model.actionLabel) { model.primaryAction() }
                 .buttonStyle(.borderedProminent).controlSize(.large).frame(maxWidth: .infinity).padding(.top, 18)
-            HStack(spacing: 4) {
-                Text(model.keyLabel)
-                Text(model.isDark ? "Restore display" : "Schedule dim")
-            }.font(.system(size: 10)).foregroundStyle(.secondary).frame(maxWidth: .infinity).padding(.vertical, 18)
+            Spacer().frame(height: 22)
             Divider()
             HStack {
                 Button("Settings…", action: settings)
                 Spacer()
                 Button("Quit", action: quit)
             }.buttonStyle(.plain).font(.system(size: 12)).foregroundStyle(.secondary).padding(.top, 12)
-        }.padding(20).frame(width: 280)
+        }.padding(22).frame(width: 320)
     }
 }
 
 struct SettingsView: View {
     @ObservedObject var model: AppModel
     let showPanel: () -> Void
+    var checkUpdates: () -> Void = {}
+    var showTutorial: () -> Void = {}
     @State private var monitor: Any?
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
+            HStack {
+                Button("‹ Back", action: showPanel).buttonStyle(.plain)
+                Spacer()
+                Text("Settings").fontWeight(.semibold)
+                Spacer()
+                Color.clear.frame(width: 36, height: 1)
+            }.padding(.bottom, 16)
             group {
                 row("Dim after") {
                     Picker("Dim after", selection: $model.delay) {
@@ -58,7 +65,7 @@ struct SettingsView: View {
                 Divider()
                 row("Shortcut") {
                     Button(model.recording ? "Press shortcut…" : model.shortcut.label) { beginRecording() }
-                        .frame(minWidth: 140).controlSize(.large)
+                        .frame(minWidth: 90).controlSize(.large)
                         .accessibilityLabel("Record shortcut")
                         .help("Restore the display or schedule dimming.")
                 }
@@ -89,11 +96,16 @@ struct SettingsView: View {
             if let error = model.error {
                 Text(error).font(.system(size: 11)).foregroundStyle(.red).fixedSize(horizontal: false, vertical: true)
             }
-            HStack { Spacer(); Button("Open Panel", action: showPanel).font(.system(size: 11)) }.padding(.top, 16)
+            HStack {
+                Button("Tutorial", action: showTutorial)
+                Spacer()
+                Button("Check for Updates…", action: checkUpdates).disabled(model.demo)
+            }.buttonStyle(.plain).font(.system(size: 11)).foregroundStyle(.secondary).padding(.top, 16)
+            Text("Version " + (Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "—")).font(.caption2).foregroundStyle(.secondary).padding(.top, 10)
             if model.demo {
                 Text("Preview").font(.caption).foregroundStyle(.secondary)
             }
-        }.font(.system(size: 13)).padding(28).frame(width: 400)
+        }.font(.system(size: 13)).padding(22).frame(width: 320)
             .background(Color(nsColor: .windowBackgroundColor))
             .onDisappear { endRecording() }
     }

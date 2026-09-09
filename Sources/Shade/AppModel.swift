@@ -9,18 +9,28 @@ final class AppModel: ObservableObject {
     @Published var error: String?
     @Published var keyboardIssue: String?
     @Published var delay: Double {
-        didSet { UserDefaults.standard.set(delay, forKey: "delay"); reserveIfPending() }
+        didSet {
+            if !demo {
+                UserDefaults.standard.set(delay, forKey: "delay")
+            }; reserveIfPending()
+        }
     }
 
     @Published var shortcut: Shortcut {
         didSet {
-            UserDefaults.standard.set(try? JSONEncoder().encode(shortcut), forKey: "hotkey")
+            if !demo {
+                UserDefaults.standard.set(try? JSONEncoder().encode(shortcut), forKey: "hotkey")
+            }
             configureKeyboard()
         }
     }
 
     @Published var wakeOnTouch: Bool {
-        didSet { UserDefaults.standard.set(wakeOnTouch, forKey: "wakeOnTouch") }
+        didSet {
+            if !demo {
+                UserDefaults.standard.set(wakeOnTouch, forKey: "wakeOnTouch")
+            }
+        }
     }
 
     @Published var recording = false
@@ -176,6 +186,7 @@ final class AppModel: ObservableObject {
     }
 
     func setLogin(_ enabled: Bool) {
+        guard !demo else { loginEnabled = enabled; return }
         do {
             if enabled {
                 try SMAppService.mainApp.register()
