@@ -1,10 +1,11 @@
 import Foundation
 import IOKit
+import ShadeCore
 
 /// Reads only elapsed hardware idle time; never receives key codes or pointer positions.
 final class PhysicalActivity {
     private var service: io_service_t = 0
-    private var lastInput: TimeInterval?
+    private var tracker = PhysicalActivityTracker()
 
     func start() throws {
         stop()
@@ -21,10 +22,11 @@ final class PhysicalActivity {
               let value = IORegistryEntryCreateCFProperty(service, "HIDIdleTime" as CFString, kCFAllocatorDefault, 0)?.takeRetainedValue() as? NSNumber else { return nil }
         let idle = value.doubleValue / 1_000_000_000
         guard idle.isFinite, idle >= 0 else { return nil }
-        let input = ProcessInfo.processInfo.systemUptime - idle
-        let changed = lastInput.map { input > $0 + 0.05 } ?? false
-        lastInput = max(lastInput ?? input, input)
-        return changed
+        return tracker.sample(idle: idle, uptime: ProcessInfo.processInfo.systemUptime)
+    }
+
+    func suppressDimmingGesture() {
+        tracker.suppress(until: ProcessInfo.processInfo.systemUptime + 1)
     }
 
     func stop() {
@@ -32,7 +34,7 @@ final class PhysicalActivity {
             IOObjectRelease(service)
         }
         service = 0
-        lastInput = nil
+        tracker = PhysicalActivityTracker()
     }
 
     deinit { stop() }

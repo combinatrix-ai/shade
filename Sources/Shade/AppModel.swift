@@ -157,6 +157,9 @@ final class AppModel: ObservableObject {
                 throw ShadeFailure(message: "Hardware activity detection is unavailable.")
             }
             try brightness.set(id, 0)
+            // Ignore the remainder of the dimming gesture, including events
+            // sampled after the grace period but originating within it.
+            activity.suppressDimmingGesture()
             session.didDim()
         } catch { self.error = error.localizedDescription; disable() }
     }
