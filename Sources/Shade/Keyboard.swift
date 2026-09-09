@@ -37,7 +37,11 @@ final class KeyboardListener {
     private var hotKey: EventHotKeyRef?
     private var handler: EventHandlerRef?
     var ready: Bool {
-        tap != nil || hotKey != nil
+        if hotKey != nil {
+            return true
+        }
+        guard let tap else { return false }
+        return CGPreflightListenEventAccess() && CGEvent.tapIsEnabled(tap: tap)
     }
 
     func configure(custom: Shortcut?) -> String? {
