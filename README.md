@@ -21,7 +21,7 @@ Requires macOS 14+, Xcode command-line tools, and Swift 6. No third-party depend
 open build/Shade.app
 ```
 
-`./scripts/build.sh` creates an ad-hoc signed local app. Set `SHADE_SIGN_IDENTITY` to a signing identity to use your own certificate. This is a local developer build, not a notarized release or an App Store submission.
+`./scripts/build.sh` creates an ad-hoc signed local app. Set `SHADE_SIGN_IDENTITY` or the gitignored `.signing-identity` file to a signing identity to use your own certificate. This is a local developer build, not a notarized release or an App Store submission.
 
 For the both-Shift gesture, enable Shade under **System Settings > Privacy & Security > Input Monitoring**, then click **Recheck** in Shade's settings. macOS may require a restart after permission changes. Custom shortcuts use Carbon's hot-key registration and do not need Input Monitoring. Shade does not record or transmit keyboard events.
 
@@ -44,3 +44,5 @@ Dimming is not a security boundary; anyone can restore the display. Only the bui
 ## Verification
 
 `swift test` covers timer boundaries, explicit rearming after restore, off-state behavior, interrupted Shift holds, and one-shot hold detection. `./scripts/build.sh` compiles the full app. Live acceptance should additionally check timer-driven dimming, normal input staying dark, global shortcut restoration, normal quit, and crash restoration. Do not infer live acceptance from a successful build.
+
+See [docs/verification.md](docs/verification.md) for the measured local results and remaining physical checks. Ad-hoc signing may require granting Input Monitoring again after a code change; use a stable signing certificate for ongoing distribution.

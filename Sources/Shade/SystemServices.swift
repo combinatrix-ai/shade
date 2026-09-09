@@ -54,6 +54,10 @@ final class Brightness {
 
 final class AwakeHold {
     private var process: Process?
+    var isRunning: Bool {
+        process?.isRunning == true
+    }
+
     func start() throws {
         if process?.isRunning == true {
             return
@@ -79,6 +83,10 @@ final class AwakeHold {
 /// The child restores brightness when its parent's pipe closes, even on SIGKILL.
 final class RestoreGuard {
     private var process: Process?
+    var isRunning: Bool {
+        process?.isRunning == true
+    }
+
     private var pipe: Pipe?
     func start(display: UInt32, brightness: Float) throws {
         guard let executable = Bundle.main.executableURL else { throw ShadeFailure(message: "復帰用プロセスを起動できません。") }

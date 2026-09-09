@@ -210,6 +210,11 @@ final class AppModel: ObservableObject {
 
     private func tick() {
         now = Date()
+        if isOn, !demo, !keyboard.ready || !awake.isRunning || (isDark && restoreGuard?.isRunning != true) {
+            error = "復帰キーまたはスリープ防止を利用できなくなったため、終了しました。"
+            disable()
+            return
+        }
         if let enabledAt, now.timeIntervalSince(enabledAt) >= 28790 {
             disable(); return
         }

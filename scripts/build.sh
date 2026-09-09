@@ -6,6 +6,10 @@ app_dir="$PWD/build/Shade.app"
 mkdir -p "$app_dir/Contents/MacOS"
 cp .build/release/Shade "$app_dir/Contents/MacOS/Shade"
 cp Info.plist "$app_dir/Contents/Info.plist"
-# Stable bundle identity and requirement preserve local permissions across rebuilds.
-codesign --force --sign "${SHADE_SIGN_IDENTITY:--}" --identifier app.hmirin.shade "$app_dir"
+# A certificate-based identity is recommended for stable permissions across rebuilds.
+sign_identity="${SHADE_SIGN_IDENTITY:-}"
+if [[ -z "$sign_identity" && -f .signing-identity ]]; then
+  sign_identity="$(<.signing-identity)"
+fi
+codesign --force --sign "${sign_identity:--}" --identifier app.hmirin.shade "$app_dir"
 print -r -- "$app_dir"
