@@ -1,12 +1,14 @@
 # Shade
 
-**A band-aid for the Computer Use era. Let the screen rest while the agent keeps working.**
+**A band-aid for the Computer Use era. Darken the screen while the agent keeps working.**
 
 Shade is a small macOS menu bar app that keeps the Mac awake while dimming its built-in display to zero. The desktop stays available to Computer Use, without leaving the screen lit throughout an unattended agent session. Think of it as an Amphetamine-like utility for a Mac that an agent is still using after its human has stepped away.
 
 ## Why a band-aid?
 
-Computer Use creates a practical mismatch: the agent needs a usable desktop, while the physical screen has no reason to stay bright. Shade fills that gap with a temporary way to rest the display and bring it back when needed.
+When you step away from your Mac, you do not want its screen exposing your work to anyone nearby. Normally, you would lock it. But locking the desktop also prevents Computer Use from continuing its work. Shade is a stopgap: leave the session unlocked so the agent can work, and darken the physical display so its contents are not left in plain sight.
+
+**Do not use Shade for serious security needs. A dark screen is still an unlocked Mac.** Anyone with physical access can turn the brightness back up and use the session. Shade does not provide access control or replace a screen lock. If an unattended, unlocked session is unacceptable for your data or environment, lock the Mac and stop Computer Use instead.
 
 We expect this kind of separation between an agent's working session and the physical display to become an OS-level concern. Our hope is that macOS will eventually provide a native solution. Shade is the band-aid for the meantime: a small, reversible utility, deliberately limited to keeping the session awake, dimming the screen, and restoring its brightness.
 
