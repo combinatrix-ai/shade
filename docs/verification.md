@@ -22,3 +22,12 @@ The user's physical both-Shift hold and custom shortcut activation have not yet 
 - `scripts/check.sh` passes two session tests and 20 real child disarm/exit cycles without changing the display. The removed Shift tests are no longer applicable.
 - Live UI: default shortcut registered, recorder opened and canceled; two dim/restore cycles completed without blocking and the app could be turned off afterward.
 - The panel now hides on outside mouse events, application deactivation, and key-window resignation. Escape is handled by the local key monitor and panel cancel action. CUA's app-directed Escape did not yield an observable dismissal, so physical outside-click/Escape acceptance remains to be confirmed rather than inferred from code.
+
+
+## Automatic dimming after hardware inactivity
+
+- Reads only IOHIDSystem HIDIdleTime; no event contents or new permissions.
+- Local read-only probe: the counter continued increasing through Computer Use clicks and reset on physical activity. This is not guaranteed for virtual HID drivers or all remote-control tools.
+- Native app: Dim Now reached Display dimmed; Restore Display returned directly to Dimming in 1:00, counted down to 0:32, and automatically reached Display dimmed again. Turning Shade off restored brightness and reached Off / Ready to dim.
+- Core regression checks cover automatic restore deadlines, activity rescheduling, dark input staying dark, and off-state restoration.
+- Wake on touch remains a mock-only proposal. This change does not add trackpad-contact detection.

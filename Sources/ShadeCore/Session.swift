@@ -1,6 +1,6 @@
 import Foundation
 
-public enum Phase: Equatable { case off, pending(deadline: Date), dark, visible }
+public enum Phase: Equatable { case off, pending(deadline: Date), dark }
 
 /// State transitions are committed only after the associated system operation succeeds.
 public struct Session {
@@ -36,9 +36,9 @@ public struct Session {
         }
     }
 
-    public mutating func didRestore() {
+    public mutating func didRestore(now: Date, delay: TimeInterval) {
         if phase == .dark {
-            phase = .visible
+            phase = .pending(deadline: now.addingTimeInterval(delay))
         }
     }
 

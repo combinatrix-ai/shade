@@ -17,9 +17,9 @@ We expect this kind of separation between an agent's working session and the phy
 ## Behavior
 
 - Starts off. Double-click or right-click the menu bar icon to toggle wake prevention. A single click opens the panel after the system double-click interval.
-- After 1 minute (configurable: 30 seconds, 1, 3, or 5 minutes), sets the built-in display's brightness to zero.
+- After 1 minute without hardware input (configurable: 30 seconds, 1, 3, or 5 minutes), sets the built-in display's brightness to zero. Physical keyboard and pointer activity postpone dimming while the display is visible.
 - Press **Control + Option + Command + D** to restore the saved brightness. Keeping the Mac awake continues.
-- Perform the same action while the display is visible to schedule dimming again. Ordinary typing and pointer movement do not restore the brightness.
+- Restoring the display automatically starts a fresh dimming countdown. The shortcut restarts that countdown while visible. The brightness-up key also returns to automatic dimming, preserving the brightness you chose. Ordinary typing and pointer movement do not restore the brightness; Wake on touch remains a UI proposal.
 - Click the shortcut field and press a new combination with Command, Control, or Option to replace it. Escape cancels recording.
 - The menu panel closes on an outside click, app switch, or Escape.
 - Turning off or quitting restores the brightness and releases this app's wake assertions. Sessions end after a maximum of 8 hours. Manual sleep or switching away from the user session ends the session.
@@ -56,8 +56,10 @@ Dimming is not a security boundary; anyone can restore the display. Only the bui
 
 ## Verification
 
-`swift test` covers timer boundaries, explicit rearming after restore, off-state behavior, explicit timer rescheduling. `./scripts/build.sh` compiles the full app. Live acceptance should additionally check timer-driven dimming, normal input staying dark, global shortcut restoration, normal quit, and crash restoration. Do not infer live acceptance from a successful build.
+`swift test` covers timer boundaries, automatic rearming after restore, off-state behavior, explicit timer rescheduling. `./scripts/build.sh` compiles the full app. Live acceptance should additionally check timer-driven dimming, normal input staying dark, global shortcut restoration, normal quit, and crash restoration. Do not infer live acceptance from a successful build.
 
 See [docs/verification.md](docs/verification.md) for the measured local results and remaining physical checks. Use a stable signing certificate for ongoing distribution.
 
 The original mock in `docs/mock.html` is historical: the keyboard selector was subsequently replaced with a single recorder field. `scripts/test-restore-guard.py` runs 20 real companion-process disarm cycles without changing the display.
+
+Hardware activity is read from IOHIDSystem’s `HIDIdleTime`; no key contents or pointer coordinates are collected and no Input Monitoring permission is required. In local measurement, Computer Use clicks did not reset this counter. This is a best-effort distinction, not a guarantee for every automation tool or virtual HID driver. If the counter cannot be read, Shade stops and restores the display.

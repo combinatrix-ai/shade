@@ -22,6 +22,7 @@ final class AppModel: ObservableObject {
     @Published var recording = false
     @Published var loginEnabled = false
     private let awake = AwakeHold()
+    private let activity = PhysicalActivity()
     private let keyboard = KeyboardListener()
     private var brightness: Brightness?
     private var snapshot: (display: UInt32, value: Float)?
@@ -65,12 +66,11 @@ final class AppModel: ObservableObject {
         case .off: return "Ready to dim"
         case .pending: let t = session.remaining(now: now); return String(format: "Dimming in %d:%02d", t / 60, t % 60)
         case .dark: return "Display dimmed"
-        case .visible: return "Display on"
         }
     }
 
     var actionLabel: String {
-        switch session.phase { case .off: return "Turn On"; case .pending: return "Dim Now"; case .dark: return "Restore Display"; case .visible: return "Schedule Dim" }
+        switch session.phase { case .off: return "Turn On"; case .pending: return "Dim Now"; case .dark: return "Restore Display" }
     }
 
     func toggle() {
@@ -87,20 +87,21 @@ final class AppModel: ObservableObject {
                 let id = try service.internalDisplay()
                 _ = try service.get(id)
                 brightness = service
+                try activity.start()
                 try awake.start()
             }
             enabledAt = Date()
             session.enable(now: Date(), delay: delay)
-        } catch { self.error = error.localizedDescription; awake.stop() }
+        } catch { self.error = error.localizedDescription; awake.stop(); activity.stop() }
     }
 
     func disable() {
         guard restore() else { return }
-        awake.stop(); enabledAt = nil; session.disable()
+        awake.stop(); activity.stop(); enabledAt = nil; session.disable()
     }
 
     func primaryAction() {
-        switch session.phase { case .off: enable(); case .pending: dim(); case .dark: _ = restore(); case .visible: reserve() }
+        switch session.phase { case .off: enable(); case .pending: dim(); case .dark: _ = restore() }
     }
 
     func shortcutAction() {
@@ -149,7 +150,7 @@ final class AppModel: ObservableObject {
                 self.snapshot = nil
             } catch { self.error = "Could not restore brightness. Use your brightness keys.\n" + error.localizedDescription; return false }
         }
-        session.didRestore()
+        session.didRestore(now: Date(), delay: delay)
         return true
     }
 
@@ -188,12 +189,31 @@ final class AppModel: ObservableObject {
         if let enabledAt, now.timeIntervalSince(enabledAt) >= 28790 {
             disable(); return
         }
+        if isOn, !demo {
+            guard let active = activity.sample() else {
+                error = "Shade stopped: hardware activity detection unavailable."
+                disable()
+                return
+            }
+            if active, !isDark {
+                reserve()
+            }
+            // A brightness-key escape restores the screen outside Shade. Adopt that
+            // brightness and re-arm auto dim without overwriting the user's choice.
+            if isDark, let snapshot, let brightness,
+               let current = try? brightness.get(snapshot.display), current > 0
+            {
+                restoreGuard?.finish(); restoreGuard = nil
+                self.snapshot = nil
+                session.didRestore(now: now, delay: delay)
+            }
+        }
         if session.isDue(now: now) {
             dim()
         }
     }
 
     func shutdown() {
-        _ = restore(); restoreGuard?.finish(); restoreGuard = nil; awake.stop(); keyboard.stop()
+        _ = restore(); restoreGuard?.finish(); restoreGuard = nil; awake.stop(); activity.stop(); keyboard.stop()
     }
 }
