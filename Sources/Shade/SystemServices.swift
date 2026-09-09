@@ -20,7 +20,7 @@ final class Brightness {
               let getter = dlsym(handle, "DisplayServicesGetBrightness"),
               let setter = dlsym(handle, "DisplayServicesSetBrightness")
         else {
-            throw ShadeFailure(message: "このMacでは輝度の制御を利用できません。")
+            throw ShadeFailure(message: "Brightness control is unavailable on this Mac.")
         }
         self.handle = handle
         getValue = unsafeBitCast(getter, to: Get.self)
@@ -34,7 +34,7 @@ final class Brightness {
         guard CGGetOnlineDisplayList(16, &ids, &count) == .success,
               let id = ids.prefix(Int(count)).first(where: { CGDisplayIsBuiltin($0) != 0 })
         else {
-            throw ShadeFailure(message: "内蔵ディスプレイが見つかりません。")
+            throw ShadeFailure(message: "No built-in display found.")
         }
         return id
     }
@@ -42,13 +42,13 @@ final class Brightness {
     func get(_ id: CGDirectDisplayID) throws -> Float {
         var value: Float = 0
         guard getValue(id, &value) == 0, value.isFinite, (0 ... 1).contains(value) else {
-            throw ShadeFailure(message: "元の明るさを読み取れませんでした。画面は暗くしません。")
+            throw ShadeFailure(message: "Cannot read brightness. Display will stay on.")
         }
         return value
     }
 
     func set(_ id: CGDirectDisplayID, _ value: Float) throws {
-        guard setValue(id, value) == 0 else { throw ShadeFailure(message: "画面の明るさを変更できませんでした。") }
+        guard setValue(id, value) == 0 else { throw ShadeFailure(message: "Could not change display brightness.") }
     }
 }
 
@@ -89,7 +89,7 @@ final class RestoreGuard {
 
     private var pipe: Pipe?
     func start(display: UInt32, brightness: Float) throws {
-        guard let executable = Bundle.main.executableURL else { throw ShadeFailure(message: "復帰用プロセスを起動できません。") }
+        guard let executable = Bundle.main.executableURL else { throw ShadeFailure(message: "Could not start display recovery.") }
         let p = Process(), input = Pipe(), ready = Pipe()
         p.executableURL = executable
         p.arguments = ["--restore-guard", String(display), String(brightness)]
@@ -103,12 +103,12 @@ final class RestoreGuard {
             if p.isRunning {
                 p.terminate()
             }
-            throw ShadeFailure(message: "画面の復帰準備がタイムアウトしました。")
+            throw ShadeFailure(message: "Display recovery setup timed out.")
         }
         let ack = ready.fileHandleForReading.readData(ofLength: 1)
         guard ack == Data([1]) else {
             try? input.fileHandleForWriting.close()
-            throw ShadeFailure(message: "画面の復帰準備に失敗しました。")
+            throw ShadeFailure(message: "Could not prepare display recovery.")
         }
         process = p; pipe = input
     }

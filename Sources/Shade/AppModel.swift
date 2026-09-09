@@ -62,24 +62,15 @@ final class AppModel: ObservableObject {
 
     var title: String {
         switch session.phase {
-        case .off: return "いつもの画面に"
-        case .pending: let t = session.remaining(now: now); return String(format: "あと %d:%02d で暗転", t / 60, t % 60)
-        case .dark: return "画面を暗くしています"
-        case .visible: return "画面を表示しています"
-        }
-    }
-
-    var detail: String {
-        switch session.phase {
-        case .off: "オンにするとスリープを防ぎ、\n設定した時間のあとに暗転します。"
-        case .pending: "内蔵ディスプレイを暗くします。\nアプリの操作はそのまま続きます。"
-        case .dark: "ロックせずに、画面の明るさを0に。\nアプリの操作はそのまま続きます。"
-        case .visible: "スリープ防止は続いています。\n次の暗転は、キー操作で予約できます。"
+        case .off: return "Ready to dim"
+        case .pending: let t = session.remaining(now: now); return String(format: "Dimming in %d:%02d", t / 60, t % 60)
+        case .dark: return "Display dimmed"
+        case .visible: return "Display on"
         }
     }
 
     var actionLabel: String {
-        switch session.phase { case .off: return "オンにする"; case .pending: return "今すぐ暗くする"; case .dark: return "画面を戻す"; case .visible: return "暗転を予約する" }
+        switch session.phase { case .off: return "Turn On"; case .pending: return "Dim Now"; case .dark: return "Restore Display"; case .visible: return "Schedule Dim" }
     }
 
     func toggle() {
@@ -89,7 +80,7 @@ final class AppModel: ObservableObject {
     func enable() {
         error = nil
         configureKeyboard()
-        guard demo || keyboard.ready else { error = keyboardIssue ?? "画面を戻すキー操作を設定してください。"; return }
+        guard demo || keyboard.ready else { error = keyboardIssue ?? "Set a shortcut before turning on Shade."; return }
         do {
             if !demo {
                 let service = try Brightness()
@@ -136,11 +127,11 @@ final class AppModel: ObservableObject {
         if demo {
             session.didDim(); return
         }
-        guard keyboard.ready else { error = "復帰キーを利用できないため、暗転を中止しました。"; disable(); return }
+        guard keyboard.ready else { error = "Dimming stopped: shortcut unavailable."; disable(); return }
         do {
-            guard let brightness else { throw ShadeFailure(message: "輝度制御を開始できません。") }
+            guard let brightness else { throw ShadeFailure(message: "Brightness control is unavailable.") }
             let id = try brightness.internalDisplay(), original = try brightness.get(id)
-            guard original > 0 else { throw ShadeFailure(message: "画面はすでに暗くなっています。明るさを上げてからお試しください。") }
+            guard original > 0 else { throw ShadeFailure(message: "Display is already dimmed. Increase brightness and try again.") }
             let guardian = RestoreGuard()
             try guardian.start(display: id, brightness: original)
             snapshot = (id, original); restoreGuard = guardian
@@ -156,7 +147,7 @@ final class AppModel: ObservableObject {
                 try brightness.set(snapshot.display, snapshot.value)
                 restoreGuard?.finish(); restoreGuard = nil
                 self.snapshot = nil
-            } catch { self.error = "明るさを戻せませんでした。輝度キーで復帰してください。\n" + error.localizedDescription; return false }
+            } catch { self.error = "Could not restore brightness. Use your brightness keys.\n" + error.localizedDescription; return false }
         }
         session.didRestore()
         return true
@@ -182,7 +173,7 @@ final class AppModel: ObservableObject {
             }
             loginEnabled = SMAppService.mainApp.status == .enabled
             if enabled, !loginEnabled {
-                error = "システム設定のログイン項目でShadeを許可してください。"
+                error = "Allow Shade in System Settings → Login Items."
             }
         } catch { self.error = error.localizedDescription }
     }
@@ -190,7 +181,7 @@ final class AppModel: ObservableObject {
     private func tick() {
         now = Date()
         if isOn, !demo, !keyboard.ready || !awake.isRunning || (isDark && restoreGuard?.isRunning != true) {
-            error = "復帰キーまたはスリープ防止を利用できなくなったため、終了しました。"
+            error = "Shade stopped: shortcut or sleep prevention unavailable."
             disable()
             return
         }

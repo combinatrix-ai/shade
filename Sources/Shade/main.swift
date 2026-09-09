@@ -39,14 +39,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         item.button?.image = NSImage(systemSymbolName: "circle.lefthalf.filled", accessibilityDescription: "Shade")
         item.button?.target = self; item.button?.action = #selector(handleIconClick)
         item.button?.sendAction(on: [.leftMouseUp, .rightMouseUp])
-        item.button?.toolTip = "Shade · オフ"
+        item.button?.toolTip = "Shade · Off"
         model.$session.sink { [weak self] session in
             self?.item.button?.appearsDisabled = !session.isOn
-            self?.item.button?.toolTip = session.isOn ? "Shade · スリープ防止中" : "Shade · オフ"
+            self?.item.button?.toolTip = session.isOn ? "Shade · Keeping Mac awake" : "Shade · Off"
         }.store(in: &subscriptions)
         if CommandLine.arguments.contains("--demo") {
             let window = NSWindow(contentViewController: NSHostingController(rootView: PanelView(model: model, settings: { [weak self] in self?.showSettings() }, quit: { NSApp.terminate(nil) })))
-            window.title = "Shade · UIプレビュー"; window.styleMask = [.titled, .closable]; window.center(); window.makeKeyAndOrderFront(nil); demoWindow = window
+            window.title = "Shade · Preview"; window.styleMask = [.titled, .closable]; window.center(); window.makeKeyAndOrderFront(nil); demoWindow = window
             NSApp.activate(ignoringOtherApps: true)
         } else {
             showSettings()
@@ -131,7 +131,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         hidePanel()
         if settingsWindow == nil {
             let window = NSWindow(contentViewController: NSHostingController(rootView: SettingsView(model: model, showPanel: { [weak self] in self?.settingsWindow?.orderOut(nil); self?.togglePanel() })))
-            window.title = "Shade の設定"
+            window.title = "Shade Settings"
             window.styleMask = [.titled, .closable, .miniaturizable]
             window.isReleasedWhenClosed = false
             window.center()

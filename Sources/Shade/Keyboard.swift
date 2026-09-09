@@ -48,10 +48,10 @@ final class KeyboardListener {
             Unmanaged<KeyboardListener>.fromOpaque(context).takeUnretainedValue().action?()
             return noErr
         }, 1, &type, Unmanaged.passUnretained(self).toOpaque(), &handler)
-        guard result == noErr else { return "ショートカットの検出を開始できません。" }
+        guard result == noErr else { return "Shortcut detection is unavailable." }
         let id = EventHotKeyID(signature: 0x5348_4445, id: 1)
         let status = RegisterEventHotKey(UInt32(shortcut.keyCode), shortcut.modifiers, id, GetApplicationEventTarget(), 0, &hotKey)
-        guard status == noErr else { stop(); return "このショートカットは登録できません。別の組み合わせを選んでください。" }
+        guard status == noErr else { stop(); return "Shortcut unavailable. Choose another combination." }
         return nil
     }
 
