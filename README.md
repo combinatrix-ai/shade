@@ -1,6 +1,16 @@
 # Shade
 
-A small macOS menu bar app that keeps the Mac awake while dimming only the built-in display. The desktop remains available to Computer Use.
+**A band-aid for the Computer Use era. Let the screen rest while the agent keeps working.**
+
+Shade is a small macOS menu bar app that keeps the Mac awake while dimming its built-in display to zero. The desktop stays available to Computer Use, without leaving the screen lit throughout an unattended agent session. Think of it as an Amphetamine-like utility for a Mac that an agent is still using after its human has stepped away.
+
+## Why a band-aid?
+
+Computer Use creates a practical mismatch: the agent needs a usable desktop, while the physical screen has no reason to stay bright. Shade fills that gap with a temporary way to rest the display and bring it back when needed.
+
+We expect this kind of separation between an agent's working session and the physical display to become an OS-level concern. Our hope is that macOS will eventually provide a native solution. Shade is the band-aid for the meantime: a small, reversible utility, deliberately limited to keeping the session awake, dimming the screen, and restoring its brightness.
+
+**Shade is intended to become unnecessary.** If macOS provides a reliable native way to do this, retiring Shade would be a good outcome.
 
 ## Behavior
 
