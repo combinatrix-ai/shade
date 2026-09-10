@@ -33,6 +33,15 @@ final class AppModel: ObservableObject {
         }
     }
 
+    @Published var onlyOnPowerAdapter: Bool {
+        didSet {
+            if !demo {
+                UserDefaults.standard.set(onlyOnPowerAdapter, forKey: "onlyOnPowerAdapter")
+                enforcePowerPolicy()
+            }
+        }
+    }
+
     @Published var recording = false
     @Published var loginEnabled = false
     private let awake = AwakeHold()
@@ -48,6 +57,7 @@ final class AppModel: ObservableObject {
 
     init(demo: Bool = false) {
         self.demo = demo
+        onlyOnPowerAdapter = UserDefaults.standard.object(forKey: "onlyOnPowerAdapter") as? Bool ?? true
         wakeOnTouch = UserDefaults.standard.bool(forKey: "wakeOnTouch")
         let savedDelay = UserDefaults.standard.double(forKey: "delay")
         delay = [30.0, 60, 180, 300].contains(savedDelay) ? savedDelay : 60
@@ -92,8 +102,22 @@ final class AppModel: ObservableObject {
         isOn ? disable() : enable()
     }
 
+    private var powerPermitsSession: Bool {
+        demo || !onlyOnPowerAdapter || PowerSupply.isOnAdapter()
+    }
+
+    private func enforcePowerPolicy() {
+        guard isOn, !powerPermitsSession else { return }
+        disable()
+    }
+
     func enable() {
+        if snapshot != nil, !restore() { return }
         error = nil
+        guard powerPermitsSession else {
+            error = "Connect a power adapter or turn off Only on power adapter in Settings."
+            return
+        }
         configureKeyboard()
         guard demo || keyboard.ready else { error = keyboardIssue ?? "Set a shortcut before turning on Shade."; return }
         do {
@@ -112,7 +136,9 @@ final class AppModel: ObservableObject {
     }
 
     func disable() {
-        guard restore() else { return }
+        // Always release sleep prevention, even if brightness recovery fails.
+        // Keep the armed guardian/snapshot available for a recovery retry.
+        _ = restore()
         awake.stop(); activity.stop(); enabledAt = nil; session.disable()
     }
 
@@ -141,6 +167,7 @@ final class AppModel: ObservableObject {
 
     func dim() {
         guard isOn, !isDark else { return }
+        guard powerPermitsSession else { disable(); return }
         error = nil
         if demo {
             session.didDim(); return
@@ -208,6 +235,7 @@ final class AppModel: ObservableObject {
 
     private func tick() {
         now = Date()
+        enforcePowerPolicy()
         if isOn, !demo, !keyboard.ready || !awake.isRunning || (isDark && restoreGuard?.isRunning != true) {
             error = "Shade stopped: shortcut or sleep prevention unavailable."
             disable()

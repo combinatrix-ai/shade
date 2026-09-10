@@ -83,6 +83,12 @@ struct SettingsView: View {
                         .help("Restore on physical trackpad movement, mouse or keyboard input. Resting a finger alone is not detected.")
                 }
                 Divider()
+                row("Only on power adapter") {
+                    Toggle("Only on power adapter", isOn: $model.onlyOnPowerAdapter)
+                        .labelsHidden().toggleStyle(.switch).controlSize(.small)
+                        .help("Turn Shade off when unplugged. Reconnecting does not turn it on automatically.")
+                }
+                Divider()
                 row("Launch at login") {
                     Toggle("Launch at login", isOn: Binding(get: { model.loginEnabled }, set: { model.setLogin($0) })).labelsHidden().toggleStyle(.switch).controlSize(.small)
                 }

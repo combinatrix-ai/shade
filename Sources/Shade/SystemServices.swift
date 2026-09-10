@@ -1,5 +1,6 @@
 import AppKit
 import IOKit.pwr_mgt
+import IOKit.ps
 
 struct ShadeFailure: LocalizedError {
     let message: String
@@ -144,4 +145,13 @@ func runRestoreGuard() -> Never {
         Thread.sleep(forTimeInterval: 0.2)
     }
     exit(1)
+}
+
+/// Checks the actual supply, not whether the battery is currently charging.
+enum PowerSupply {
+    static func isOnAdapter() -> Bool {
+        guard let snapshot = IOPSCopyPowerSourcesInfo()?.takeRetainedValue(),
+              let source = IOPSGetProvidingPowerSourceType(snapshot)?.takeUnretainedValue() else { return false }
+        return source as String == kIOPMACPowerKey
+    }
 }

@@ -16,6 +16,7 @@ We expect this kind of separation between an agent's working session and the phy
 
 ## Behavior
 
+- **Only on power adapter** defaults on. Unplugging restores brightness and turns Shade off, releasing its sleep-prevention assertions. Reconnecting does not automatically enable Shade. Turn this setting off to use Shade on battery.
 - Starts off. Double-click or right-click the menu bar icon to toggle wake prevention. A single click opens the panel after the system double-click interval.
 - After 1 minute without hardware input (configurable: 30 seconds, 1, 3, or 5 minutes), sets the built-in display's brightness to zero. Physical keyboard and pointer activity postpone dimming while the display is visible.
 - Press **Control + Option + Command + D** to restore the saved brightness. Keeping the Mac awake continues.
