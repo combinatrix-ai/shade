@@ -14,10 +14,11 @@ struct PanelView: View {
                 Toggle("Shade", isOn: Binding(get: { model.isOn || model.waitingForPower }, set: { _ in model.toggle() }))
                     .labelsHidden().toggleStyle(.switch).controlSize(.small)
                     .accessibilityLabel("Enable Shade")
+                    .disabled(model.enableControlDisabled)
             }
             HStack(spacing: 6) {
                 Circle().fill(model.isOn ? Color(red: 0.26, green: 0.52, blue: 0.43) : .secondary).frame(width: 6, height: 6)
-                Text(model.isOn ? "Keeping Mac awake" : (model.waitingForPower ? "Paused" : "Off")).font(.system(size: 11)).foregroundStyle(.secondary)
+                Text(model.isOn ? "Keeping Mac awake" : (model.waitingForPower ? "Paused" : (model.blockedByPower ? "On battery" : "Off"))).font(.system(size: 11)).foregroundStyle(.secondary)
             }.padding(.top, 8)
             Text(model.title).font(.system(size: 18, weight: .semibold)).padding(.top, 24)
             if let issue = model.error ?? model.keyboardIssue {
@@ -29,6 +30,7 @@ struct PanelView: View {
                 }.padding(.top, 12)
             }
             Button(model.actionLabel) { model.primaryAction() }
+                .disabled(model.enableControlDisabled)
                 .buttonStyle(.borderedProminent).controlSize(.large).frame(maxWidth: .infinity).padding(.top, 18)
             Spacer().frame(height: 22)
             Divider()

@@ -42,6 +42,7 @@ final class AppModel: ObservableObject {
         }
     }
 
+    @Published private(set) var adapterConnected = true
     @Published private(set) var waitingForPower = false
     @Published var recording = false
     @Published var loginEnabled = false
@@ -64,6 +65,7 @@ final class AppModel: ObservableObject {
         delay = [30.0, 60, 180, 300].contains(savedDelay) ? savedDelay : 60
         shortcut = UserDefaults.standard.data(forKey: "hotkey").flatMap { try? JSONDecoder().decode(Shortcut.self, from: $0) } ?? .initial
         keyboard.action = { [weak self] in guard self?.recording == false else { return }; self?.shortcutAction() }
+        adapterConnected = demo || PowerSupply.isOnAdapter()
         configureKeyboard()
         loginEnabled = SMAppService.mainApp.status == .enabled
         timer = Timer.scheduledTimer(withTimeInterval: 0.25, repeats: true) { [weak self] _ in self?.tick() }
@@ -89,7 +91,7 @@ final class AppModel: ObservableObject {
 
     var title: String {
         switch session.phase {
-        case .off: return waitingForPower ? "Waiting for power adapter" : "Ready to dim"
+        case .off: return waitingForPower ? "Waiting for power adapter" : (blockedByPower ? "Connect power adapter" : "Ready to dim")
         case .pending: let t = session.remaining(now: now); return String(format: "Dimming in %d:%02d", t / 60, t % 60)
         case .dark: return "Display dimmed"
         }
@@ -103,12 +105,22 @@ final class AppModel: ObservableObject {
         (isOn || waitingForPower) ? disable() : enable()
     }
 
+    var blockedByPower: Bool {
+        !demo && onlyOnPowerAdapter && !adapterConnected
+    }
+
+    var enableControlDisabled: Bool {
+        blockedByPower && !waitingForPower && !isOn
+    }
+
     private var powerPermitsSession: Bool {
         demo || !onlyOnPowerAdapter || PowerSupply.isOnAdapter()
     }
 
     private func enforcePowerPolicy() {
-        if !powerPermitsSession {
+        let connected = demo || PowerSupply.isOnAdapter()
+        if adapterConnected != connected { adapterConnected = connected }
+        if blockedByPower {
             if isOn {
                 disable()
                 waitingForPower = true
