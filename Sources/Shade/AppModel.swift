@@ -42,6 +42,7 @@ final class AppModel: ObservableObject {
         }
     }
 
+    @Published private(set) var waitingForPower = false
     @Published var recording = false
     @Published var loginEnabled = false
     private let awake = AwakeHold()
@@ -88,18 +89,18 @@ final class AppModel: ObservableObject {
 
     var title: String {
         switch session.phase {
-        case .off: return "Ready to dim"
+        case .off: return waitingForPower ? "Waiting for power adapter" : "Ready to dim"
         case .pending: let t = session.remaining(now: now); return String(format: "Dimming in %d:%02d", t / 60, t % 60)
         case .dark: return "Display dimmed"
         }
     }
 
     var actionLabel: String {
-        switch session.phase { case .off: return "Turn On"; case .pending: return "Dim Now"; case .dark: return "Restore Display" }
+        switch session.phase { case .off: return waitingForPower ? "Turn Off" : "Turn On"; case .pending: return "Dim Now"; case .dark: return "Restore Display" }
     }
 
     func toggle() {
-        isOn ? disable() : enable()
+        (isOn || waitingForPower) ? disable() : enable()
     }
 
     private var powerPermitsSession: Bool {
@@ -107,8 +108,15 @@ final class AppModel: ObservableObject {
     }
 
     private func enforcePowerPolicy() {
-        guard isOn, !powerPermitsSession else { return }
-        disable()
+        if !powerPermitsSession {
+            if isOn {
+                disable()
+                waitingForPower = true
+            }
+        } else if waitingForPower {
+            waitingForPower = false
+            enable()
+        }
     }
 
     func enable() {
@@ -136,6 +144,7 @@ final class AppModel: ObservableObject {
     }
 
     func disable() {
+        waitingForPower = false
         // Always release sleep prevention, even if brightness recovery fails.
         // Keep the armed guardian/snapshot available for a recovery retry.
         _ = restore()
@@ -143,7 +152,7 @@ final class AppModel: ObservableObject {
     }
 
     func primaryAction() {
-        switch session.phase { case .off: enable(); case .pending: dim(); case .dark: _ = restore() }
+        switch session.phase { case .off: toggle(); case .pending: dim(); case .dark: _ = restore() }
     }
 
     func shortcutAction() {
@@ -167,7 +176,7 @@ final class AppModel: ObservableObject {
 
     func dim() {
         guard isOn, !isDark else { return }
-        guard powerPermitsSession else { disable(); return }
+        guard powerPermitsSession else { enforcePowerPolicy(); return }
         error = nil
         if demo {
             session.didDim(); return

@@ -11,13 +11,13 @@ struct PanelView: View {
                 Image(systemName: "circle.lefthalf.filled").foregroundStyle(.green)
                 Text("Shade").font(.system(size: 17, weight: .semibold))
                 Spacer()
-                Toggle("Shade", isOn: Binding(get: { model.isOn }, set: { _ in model.toggle() }))
+                Toggle("Shade", isOn: Binding(get: { model.isOn || model.waitingForPower }, set: { _ in model.toggle() }))
                     .labelsHidden().toggleStyle(.switch).controlSize(.small)
                     .accessibilityLabel("Enable Shade")
             }
             HStack(spacing: 6) {
                 Circle().fill(model.isOn ? Color(red: 0.26, green: 0.52, blue: 0.43) : .secondary).frame(width: 6, height: 6)
-                Text(model.isOn ? "Keeping Mac awake" : "Off").font(.system(size: 11)).foregroundStyle(.secondary)
+                Text(model.isOn ? "Keeping Mac awake" : (model.waitingForPower ? "Paused" : "Off")).font(.system(size: 11)).foregroundStyle(.secondary)
             }.padding(.top, 8)
             Text(model.title).font(.system(size: 18, weight: .semibold)).padding(.top, 24)
             if let issue = model.error ?? model.keyboardIssue {
@@ -86,7 +86,7 @@ struct SettingsView: View {
                 row("Only on power adapter") {
                     Toggle("Only on power adapter", isOn: $model.onlyOnPowerAdapter)
                         .labelsHidden().toggleStyle(.switch).controlSize(.small)
-                        .help("Turn Shade off when unplugged. Reconnecting does not turn it on automatically.")
+                        .help("Pause Shade when unplugged and resume when reconnected. Turning Shade off cancels automatic resume.")
                 }
                 Divider()
                 row("Launch at login") {
