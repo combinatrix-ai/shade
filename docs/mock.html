@@ -1,5 +1,1216 @@
-<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Shade — Panel mock</title><style>
-*{box-sizing:border-box}body{margin:0;background:#e8e7e3;color:#292b28;font:13px -apple-system,BlinkMacSystemFont,sans-serif;min-height:100vh}header{height:30px;background:#f5f5f180;display:flex;align-items:center;justify-content:flex-end;padding:0 34px;font-size:16px}header button{border:0;background:transparent;font-size:19px}main{display:flex;justify-content:center;gap:40px;padding:70px 30px;flex-wrap:wrap;align-items:flex-start}.caption{font-size:11px;letter-spacing:.12em;color:#777b74;margin-bottom:18px;text-transform:uppercase}.panel{width:320px;background:#fafaf7;border:1px solid #ffffffc0;border-radius:15px;padding:22px;box-shadow:0 16px 40px #24292318,0 1px 4px #24292315}.top,.row,.footer{display:flex;align-items:center;justify-content:space-between}.brand{font-size:17px;font-weight:650;letter-spacing:-.4px}button{font:inherit;cursor:pointer;color:inherit}.switch{border:0;border-radius:18px;width:34px;height:20px;padding:2px;background:#cbcec8;display:flex;align-items:center;transition:.15s}.switch:after{content:'';width:16px;height:16px;background:white;border-radius:50%;box-shadow:0 1px 2px #0002}.switch.on{background:#648777;justify-content:flex-end}.status{margin:32px 0 23px}.eyebrow{font-size:11px;color:#7b8078;margin-bottom:8px}.headline{font-size:27px;font-weight:500;letter-spacing:-.8px;font-variant-numeric:tabular-nums}.primary{width:100%;border:0;background:#e5ebe5;border-radius:8px;height:35px;color:#355342;font-weight:550}.footer{margin-top:23px;padding-top:15px;border-top:1px solid #e2e4de}.plain{background:none;border:0;padding:0;color:#757b72;font-size:12px}.row{min-height:58px;border-bottom:1px solid #e6e7e1;gap:12px}.row:last-child{border-bottom:0}.settings-body{margin-top:17px}.sub{font-size:11px;color:#858980;margin-top:5px;line-height:1.4}select,.key{background:#eeeee9;border:0;border-radius:6px;padding:6px 9px;font:inherit;color:#454c42}.key{min-width:82px}.back{border:0;background:transparent;color:#747c70;padding:0;font-size:13px}.note{max-width:320px;color:#7b8078;font-size:12px;line-height:1.6;margin-top:20px}.preview-label{font-size:11px;color:#999c94;margin-top:34px}.hidden{display:none}@media(max-width:750px){main{flex-direction:column;align-items:center;gap:40px;padding:45px 20px}}
-.welcome-icon{font-size:32px;color:#648777;margin:20px 0}.welcome-title{font-size:25px;font-weight:600;letter-spacing:-.7px;line-height:1.15;margin:0 0 14px}.welcome-copy{font-size:13px;color:#757b72;line-height:1.6;margin:0 0 24px}.escape{border-top:1px solid #e2e4de;padding-top:18px;margin-bottom:24px}.escape-key{display:inline-flex;background:#eeeee9;border:1px solid #e1e3dc;border-bottom-width:3px;border-radius:8px;padding:9px 13px;font-size:20px;margin-bottom:10px}.welcome-foot{font-size:11px;line-height:1.5;color:#858980;margin:18px 0 0}.shortcut-hint{font-size:11px;color:#858980;margin-top:7px}.welcome-done{padding:38px 0;text-align:center;color:#648777}.keyboard-crop{position:relative;overflow:hidden;flex:0 0 92px;height:86px;border-radius:9px;background:#bfc0bd;border:1px solid #adafac;box-shadow:inset 0 1px 2px #fff8}.f2-key,.key-neighbor,.lower-key{position:absolute;background:#242424;color:#f4f4f4;border:1px solid #111;border-bottom:3px solid #101010;border-radius:5px;box-shadow:inset 0 1px 0 #ffffff26,0 1px 2px #0003;display:flex;flex-direction:column;align-items:center;justify-content:center}.f2-key{left:21px;top:8px;width:50px;height:51px}.f2-key span{font-size:23px;line-height:1}.f2-key small,.key-neighbor small{font-size:9px;margin-top:5px}.key-neighbor{top:8px;width:50px;height:51px;color:#a7a7a7;font-size:18px}.left-key{left:-35px}.right-key{left:77px}.lower-key{top:65px;width:50px;height:43px;justify-content:flex-start;padding-top:7px;color:#a7a7a7;font-size:10px}.lower-left{left:-15px}.lower-mid{left:41px}.lower-right{left:97px}.escape{gap:12px!important}.escape .sub{line-height:1.5}</style><header><button onclick="document.querySelector('#interactive').scrollIntoView({behavior:'smooth'})" aria-label="Shade">◐</button></header><main><section><div class="caption">Startup tutorial</div><div class="panel" id="welcome"><div class="brand" style="display:flex;align-items:center;gap:8px"><span style="color:#648777;font-size:22px">◐</span>Shade</div><div style="height:26px"></div><h1 class="welcome-title">A dark display.<br>A working Mac.</h1><p class="welcome-copy">Keep Computer Use running<br>while your built-in display is dimmed.</p><div class="escape" style="display:flex;align-items:center;gap:14px"><div class="keyboard-crop" role="img" aria-label="Mac keyboard with the brightness-up F2 key highlighted"><div class="key-neighbor left-key">☀︎<small>F1</small></div><div class="f2-key"><span>☀︎</span><small>F2</small></div><div class="key-neighbor right-key">▣<small>F3</small></div><div class="lower-key lower-left">1</div><div class="lower-key lower-mid">2</div><div class="lower-key lower-right">3</div></div><div><div style="font-weight:600;color:#b0443e">Need your screen back?</div><div class="sub">Press the brightness-up key.</div><div class="shortcut-hint">Or press ⌃⌥⌘D</div></div></div><label style="display:flex;align-items:center;gap:7px;font-size:12px;color:#757b72;margin:0 0 14px;cursor:pointer"><input type="checkbox" style="accent-color:#648777;margin:0">Don’t show on startup</label><button class="primary" onclick="finishWelcome()">Got it — Start using Shade</button><p class="welcome-foot" style="color:#b0443e">Dimming doesn’t lock your Mac.<br>Shade is a privacy band-aid, not security.</p></div><div class="note">Shown on startup unless dismissed. Shade starts off.<br><button class="plain" onclick="resetWelcome()">Replay tutorial</button></div></section><section id="interactive"><div class="caption">Main · interactive</div><div class="panel"><div id="main"><div class="top"><span class="brand" style="display:flex;align-items:center;gap:8px"><span style="color:#648777;font-size:22px">◐</span>Shade</span><button class="switch on" id="power" aria-label="Enable Shade" onclick="togglePower()"></button></div><div class="status"><div class="eyebrow" id="status">Keeping Mac awake</div><div class="headline" id="title">Dimming in 0:59</div></div><button class="primary" id="action" onclick="act()">Dim Now</button><div class="footer"><button class="plain" onclick="showSettings(true)">Settings <span style="margin-left:5px">›</span></button><button class="plain" onclick="off()">Quit</button></div></div><div id="settings" class="hidden"></div></div><div class="note">Settings opens inside this panel.</div></section><section><div class="caption">Settings · same panel</div><div class="panel" id="reference"></div><div class="note">Wake on touch restores on physical trackpad movement, mouse or keyboard input.</div></section><section><div class="caption">On battery · power adapter only</div><div class="panel" style="padding:22px;width:320px"><div class="top"><strong>◐ Shade</strong><button class="switch" disabled aria-label="Enable Shade"></button></div><div class="sub">On battery</div><h3>Connect power adapter</h3><button disabled style="width:100%;padding:10px">Turn On</button><hr><button onclick="showSettings(true)">Settings…</button></div></section></main><template id="settings-template"><div class="top"><button class="back" onclick="showSettings(false)">‹ Back</button><span style="font-weight:600">Settings</span><span style="width:36px"></span></div><div class="settings-body"><div class="row"><span>Dim after</span><select aria-label="Dim after"><option>30 sec</option><option selected>1 min</option><option>3 min</option><option>5 min</option></select></div><div class="row"><span>Shortcut</span><button class="key" onclick="record(this)">⌃⌥⌘D</button></div><div class="row"><div>Wake on touch<div class="sub">Light up with a flick.</div></div><button class="switch" aria-label="Wake on touch" onclick="this.classList.toggle('on')"></button></div><div class="row"><span>Only on power adapter</span><button class="switch on" aria-label="Only on power adapter" onclick="this.classList.toggle('on')"></button></div><div class="row"><span>Launch at login</span><button class="switch" aria-label="Launch at login" onclick="this.classList.toggle('on')"></button></div></div></template><script>
-const welcomeHTML=document.querySelector('#welcome').innerHTML;function finishWelcome(){document.querySelector('#welcome').innerHTML='<div class="welcome-done">You’re all set.</div>';phase='off';render();showSettings(false)}function resetWelcome(){document.querySelector('#welcome').innerHTML=welcomeHTML}let phase='pending';const $=s=>document.querySelector(s);for(const id of ['#settings','#reference'])$(id).innerHTML=$('#settings-template').innerHTML;function showSettings(v){$('#main').classList.toggle('hidden',v);$('#settings').classList.toggle('hidden',!v)}function render(){const on=phase!=='off';$('#power').classList.toggle('on',on);$('#status').textContent=on?'Keeping Mac awake':'Off';$('#title').textContent={off:'Ready to dim',pending:'Dimming in 0:59',dark:'Display dimmed',visible:'Display on'}[phase];$('#action').textContent={off:'Turn On',pending:'Dim Now',dark:'Restore Display',visible:'Schedule Dim'}[phase]}function togglePower(){phase=phase==='off'?'pending':'off';render()}function off(){phase='off';render()}function act(){phase={off:'pending',pending:'dark',dark:'visible',visible:'pending'}[phase];render()}function record(b){const old=b.textContent;b.textContent='Press keys…';function capture(e){e.preventDefault();if(e.key==='Escape'){b.textContent=old;window.removeEventListener('keydown',capture);return}if(!e.metaKey&&!e.ctrlKey&&!e.altKey)return;if(['Meta','Control','Alt','Shift'].includes(e.key))return;b.textContent=(e.ctrlKey?'⌃':'')+(e.altKey?'⌥':'')+(e.shiftKey?'⇧':'')+(e.metaKey?'⌘':'')+e.key.toUpperCase();window.removeEventListener('keydown',capture)}window.addEventListener('keydown',capture)}
-</script></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Shade — UI/UX mock (Opus)</title>
+<style>
+:root{
+  color-scheme:light;
+  --paper:#EDEAE4; --paper2:#F5F3EE;
+  --ink:#22261F; --ink2:#6E7469; --ink3:#93988D;
+  --line:#DEDBD2;
+  --panel:#FCFBF8; --panel-line:#E5E3DB;
+  --green:#3E6B54; --green-d:#2E5643; --green-soft:#E7EFE8; --green-line:#C9DBCE;
+  --amber:#8F6A20; --amber-hi:#C1953E; --amber-soft:#F7F0DF; --amber-line:#E5D5B2;
+  --red:#A5443C; --red-soft:#F8E9E6; --red-line:#EED3CD;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --ui:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:14px/1.6 var(--ui)}
+a{color:var(--green-d)}
+:focus-visible{outline:2px solid var(--green);outline-offset:3px;border-radius:4px}
+
+/* ─── page chrome ─────────────────────────────────────────── */
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px 96px}
+.masthead{padding:56px 0 30px;border-bottom:1px solid var(--line)}
+.eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink3);margin:0 0 14px}
+h1{font-size:38px;line-height:1.08;letter-spacing:-1.1px;font-weight:600;margin:0 0 14px}
+.lede{font-size:15px;color:var(--ink2);max-width:64ch;margin:0}
+.toc{position:sticky;top:0;z-index:20;background:rgba(237,234,228,.9);backdrop-filter:saturate(160%) blur(10px);border-bottom:1px solid var(--line);margin-bottom:8px}
+.toc ul{display:flex;flex-wrap:wrap;gap:6px;list-style:none;margin:0 auto;padding:9px 24px;max-width:1180px}
+.toc a{display:block;font-size:12px;color:var(--ink2);text-decoration:none;padding:5px 10px;border-radius:999px;border:1px solid transparent}
+.toc a:hover{background:#fff;border-color:var(--line);color:var(--ink)}
+section{padding-top:54px;scroll-margin-top:56px}
+h2{font-size:12px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink3);font-weight:600;margin:0 0 10px}
+h3{font-size:23px;letter-spacing:-.5px;font-weight:600;margin:0 0 10px}
+.section-note{color:var(--ink2);max-width:70ch;margin:0 0 26px;font-size:14px}
+.ja{font-size:12.5px;line-height:1.85;color:var(--ink2)}
+.ja b{color:var(--ink);font-weight:600}
+
+/* ─── native panel ────────────────────────────────────────── */
+.panel{
+  width:320px;flex:0 0 320px;background:var(--panel);border-radius:14px;padding:20px;
+  border:1px solid rgba(255,255,255,.9);
+  box-shadow:0 0 0 1px rgba(34,38,31,.10),0 2px 3px rgba(34,38,31,.05),0 16px 38px rgba(34,38,31,.16);
+  font:13px/1.45 var(--ui);color:var(--ink);text-align:left;
+}
+.panel button{font:inherit;color:inherit;cursor:pointer}
+.p-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.brand{display:flex;align-items:center;gap:7px;font-size:16px;font-weight:650;letter-spacing:-.35px}
+.brand svg{width:16px;height:16px;color:var(--green);flex:0 0 16px}
+.sw{width:36px;height:21px;border-radius:11px;background:#CFD1C9;border:0;padding:2px;display:flex;align-items:center;transition:background .16s;flex:0 0 36px}
+.sw::after{content:'';width:17px;height:17px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.3);transition:transform .16s}
+.sw[aria-checked="true"]{background:var(--green)}
+.sw[aria-checked="true"]::after{transform:translateX(15px)}
+.sw.amber[aria-checked="true"]{background:var(--amber-hi)}
+.sw[aria-disabled="true"]{opacity:.4;cursor:not-allowed}
+.sw.sm{width:32px;height:19px;flex:0 0 32px}
+.sw.sm::after{width:15px;height:15px}
+.sw.sm[aria-checked="true"]::after{transform:translateX(13px)}
+
+.chip{display:flex;align-items:center;gap:7px;margin-top:18px}
+.pill{font-size:9.5px;font-weight:700;letter-spacing:.1em;padding:2.5px 6px;border-radius:5px;background:#E4E4DD;color:#7C8177}
+.pill.on{background:var(--green);color:#fff}
+.pill.paused{background:transparent;color:var(--amber);box-shadow:inset 0 0 0 1.3px var(--amber-line)}
+.chip-t{font-size:11.5px;color:var(--ink2)}
+.chip-t.warn{color:var(--amber)}
+
+.headline{font-size:22px;font-weight:600;letter-spacing:-.5px;margin-top:11px;font-variant-numeric:tabular-nums}
+.sub{font-size:11.5px;color:var(--ink2);margin-top:5px;line-height:1.5}
+
+.meter{height:4px;border-radius:3px;background:#E6E5DE;margin-top:13px;overflow:hidden}
+.meter i{display:block;height:100%;border-radius:3px;background:var(--green);transition:width .25s linear}
+.meter i.amber{background:var(--amber-hi)}
+.meter-l{display:flex;justify-content:space-between;font-size:10px;color:var(--ink3);margin-top:5px;font-variant-numeric:tabular-nums}
+
+.card{display:flex;gap:9px;padding:11px 12px;border-radius:9px;margin-top:14px;font-size:11.5px;line-height:1.5}
+.card svg{width:14px;height:14px;flex:0 0 14px;margin-top:1px}
+.card.amber{background:var(--amber-soft);color:#6E5520;box-shadow:inset 0 0 0 1px var(--amber-line)}
+.card.red{background:var(--red-soft);color:#7E332C;box-shadow:inset 0 0 0 1px var(--red-line)}
+.card b{display:block;font-weight:650;margin-bottom:2px;color:inherit}
+.card-acts{display:flex;gap:8px;margin-top:9px;flex-wrap:wrap}
+.mini{border:0;border-radius:6px;padding:5px 9px;font-size:11px;font-weight:600;cursor:pointer}
+.mini.solid{background:var(--amber);color:#fff}
+.mini.solid.red{background:var(--red)}
+.mini.ghost{background:rgba(255,255,255,.72);color:inherit;box-shadow:inset 0 0 0 1px rgba(0,0,0,.09)}
+
+.btn{width:100%;height:33px;border:0;border-radius:8px;font-size:13px;font-weight:600;margin-top:16px}
+.btn.primary{background:var(--green);color:#fff}
+.btn.primary:hover{background:var(--green-d)}
+.btn.neutral{background:#EAEAE3;color:#3B4038}
+.btn.neutral:hover{background:#E1E1D9}
+.btn[disabled]{opacity:.38;cursor:not-allowed}
+.hint{font-size:10.5px;color:var(--ink3);margin-top:10px;line-height:1.55}
+.hint kbd{font:inherit;font-weight:600;color:var(--ink2)}
+
+.p-foot{display:flex;justify-content:space-between;align-items:center;margin-top:18px;padding-top:13px;border-top:1px solid var(--panel-line)}
+.link{background:none;border:0;padding:0;font-size:12px;color:var(--ink2)}
+.link:hover{color:var(--ink)}
+
+/* settings */
+.s-head{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;margin-bottom:15px}
+.s-head b{font-size:13px;font-weight:650;text-align:center}
+.s-head .link{justify-self:start}
+.group{border-radius:10px;background:#F4F3EE;box-shadow:inset 0 0 0 1px rgba(34,38,31,.09);padding:0 12px}
+.row{display:flex;align-items:center;gap:12px;min-height:46px;padding:9px 0;border-bottom:1px solid rgba(34,38,31,.075)}
+.row:last-child{border-bottom:0}
+.row .rl{flex:1;min-width:0}
+.row .rl span{display:block;font-size:12.5px}
+.row .rl small{display:block;font-size:10.5px;color:var(--ink3);line-height:1.45;margin-top:2px}
+select.pick{font:inherit;font-size:12px;background:#fff;border:1px solid rgba(34,38,31,.16);border-radius:6px;padding:4px 6px;color:var(--ink)}
+.keyfield{min-width:96px;text-align:center;background:#fff;border:1px solid rgba(34,38,31,.18);border-radius:6px;padding:6px 10px;font-size:12px;font-weight:600;letter-spacing:.3px}
+.keyfield.rec{border-color:var(--green);box-shadow:0 0 0 3px rgba(62,107,84,.16);color:var(--green-d);font-weight:500}
+.keyfield.bad{border-color:var(--red);box-shadow:0 0 0 3px rgba(165,68,60,.14)}
+.recbar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 0 11px;font-size:10.5px;color:var(--ink3)}
+.recbar .mini.ghost{background:#fff}
+.recerr{color:var(--red);font-size:10.5px;line-height:1.5;padding:0 0 11px;display:flex;gap:6px}
+.recerr svg{width:14px;height:14px;flex:0 0 14px;margin-top:1px}
+.badge{font-size:9.5px;font-weight:700;letter-spacing:.06em;padding:2px 5px;border-radius:4px;background:var(--amber-soft);color:var(--amber);box-shadow:inset 0 0 0 1px var(--amber-line);white-space:nowrap}
+.s-foot{display:flex;justify-content:space-between;margin-top:16px}
+.ver{font-size:10.5px;color:var(--ink3);margin-top:9px}
+
+/* tutorial */
+.t-title{font-size:25px;font-weight:600;letter-spacing:-.75px;line-height:1.16;margin:24px 0 0}
+.t-copy{font-size:12.5px;color:var(--ink2);line-height:1.65;margin:12px 0 20px}
+.t-rule{border-top:1px solid var(--panel-line);padding-top:18px;display:flex;gap:14px;align-items:center}
+.t-rec b{display:block;font-size:12px;font-weight:650;color:var(--red);margin-bottom:5px}
+.t-rec span{display:block;font-size:11px;color:var(--ink2);line-height:1.55}
+.t-check{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink2);margin:20px 0 0;cursor:pointer}
+.t-check input{accent-color:var(--green);width:14px;height:14px;margin:0}
+.t-warn{font-size:11px;line-height:1.6;color:var(--red);margin:18px 0 0}
+
+/* keyboard illustration */
+.kb{position:relative;flex:0 0 106px;height:88px;border-radius:9px;overflow:hidden;background:#B9BAB6;box-shadow:inset 0 1px 0 rgba(255,255,255,.55),inset 0 0 0 1px rgba(0,0,0,.14)}
+.kb i{position:absolute;background:#232323;border:1px solid #101010;border-bottom-width:3px;border-radius:5px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#9C9C9C;font-style:normal;box-shadow:inset 0 1px 0 rgba(255,255,255,.16),0 1px 2px rgba(0,0,0,.3)}
+.kb i.f{top:7px;width:48px;height:49px}
+.kb i.f1{left:-32px}
+.kb i.f2{left:24px;color:#fff;background:#2B2B2B;border-color:#000}
+.kb i.f3{left:80px}
+.kb i.n{top:63px;width:48px;height:42px;justify-content:flex-start;padding-top:6px;font-size:10px}
+.kb i.n1{left:-10px}
+.kb i.n2{left:46px}
+.kb em{font-style:normal;font-size:20px;line-height:1}
+.kb i.f2 em{font-size:22px}
+.kb small{font-size:8.5px;margin-top:4px;letter-spacing:.02em}
+
+/* ─── overview grid ───────────────────────────────────────── */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:34px 26px;align-items:start}
+.frame{display:flex;flex-direction:column;gap:0}
+.frame-h{display:flex;align-items:baseline;gap:8px;margin-bottom:4px;flex-wrap:wrap}
+.frame-n{font-size:10px;font-weight:700;color:#fff;background:var(--ink3);border-radius:4px;padding:1px 5px;letter-spacing:.04em}
+.frame-t{font-size:13.5px;font-weight:650;letter-spacing:-.2px}
+.frame-s{font-size:11.5px;color:var(--ink3);margin:0 0 12px}
+.stage{padding:8px 0 0;display:flex;justify-content:flex-start;overflow-x:auto}
+.frame-ja{font-size:11.5px;line-height:1.8;color:var(--ink2);margin:14px 0 0;padding-left:11px;border-left:2px solid var(--green-line)}
+.frame-ja b{color:var(--ink);font-weight:600}
+.openbtn{margin-top:11px;align-self:flex-start;background:none;border:1px solid var(--line);border-radius:999px;padding:4px 11px;font:inherit;font-size:11px;color:var(--ink2);cursor:pointer}
+.openbtn:hover{background:#fff;color:var(--ink)}
+
+/* ─── prototype ───────────────────────────────────────────── */
+.proto{display:grid;grid-template-columns:minmax(360px,420px) minmax(300px,1fr);gap:30px;align-items:start}
+@media(max-width:860px){.proto{grid-template-columns:1fr}}
+.desk{background:linear-gradient(168deg,#4C5A50,#2F3A33 62%,#26302A);border-radius:14px;padding:0 0 30px;box-shadow:0 18px 44px rgba(34,38,31,.28);overflow:hidden}
+.menubar{height:26px;background:rgba(250,250,246,.9);display:flex;align-items:center;justify-content:flex-end;gap:14px;padding:0 12px;font-size:11.5px;color:#3A3F37}
+.menubar .mb-i{background:none;border:0;padding:0 3px;line-height:0;cursor:pointer;border-radius:4px}
+.menubar .mb-i svg{width:15px;height:15px;color:#2E3229}
+.menubar .mb-i.off svg{opacity:.34}
+.menubar .mb-i.hit{background:rgba(62,107,84,.18)}
+.desk-body{padding:16px 20px 0;display:flex;justify-content:center}
+.tooltip{text-align:center;font-size:10.5px;color:rgba(255,255,255,.62);padding:12px 16px 0}
+.closed{width:320px;border-radius:14px;border:1px dashed rgba(255,255,255,.3);color:rgba(255,255,255,.7);font-size:12px;padding:38px 20px;text-align:center}
+
+.sim{background:var(--paper2);border:1px solid var(--line);border-radius:12px;padding:18px}
+.sim h4{margin:0 0 3px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);font-weight:600}
+.sim p.k{margin:0 0 16px;font-size:11.5px;color:var(--ink3)}
+.simrow{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line);flex-wrap:wrap}
+.simrow:first-of-type{border-top:0}
+.simrow .lbl{flex:1;min-width:120px;font-size:12.5px}
+.seg{display:inline-flex;background:#E7E5DE;border-radius:8px;padding:2px}
+.seg button{border:0;background:none;padding:5px 11px;border-radius:6px;font:inherit;font-size:12px;color:var(--ink2);cursor:pointer}
+.seg button[aria-pressed="true"]{background:#fff;color:var(--ink);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.act{border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 11px;font:inherit;font-size:12px;cursor:pointer;color:var(--ink)}
+.act:hover{border-color:#C9C6BC}
+.act[disabled]{opacity:.4;cursor:not-allowed}
+.log{margin-top:16px;border-top:1px solid var(--line);padding-top:12px}
+.log ol{list-style:none;margin:0;padding:0;max-height:190px;overflow:auto;font:11px/1.7 var(--mono)}
+.log li{color:var(--ink2);display:flex;gap:9px}
+.log li span{color:var(--ink3);flex:0 0 46px}
+.log li.hi{color:var(--green-d);font-weight:600}
+.log li.bad{color:var(--red)}
+
+/* ─── sparkle dialogs ─────────────────────────────────────── */
+.alerts{display:flex;gap:26px;flex-wrap:wrap;align-items:flex-start}
+.alert{width:330px;background:#FAF9F6;border-radius:11px;border:1px solid rgba(255,255,255,.9);box-shadow:0 0 0 1px rgba(34,38,31,.1),0 16px 38px rgba(34,38,31,.17);padding:18px 20px 16px;font:13px/1.45 var(--ui);display:flex;gap:14px}
+.alert .ico{flex:0 0 44px;height:44px;border-radius:10px;background:linear-gradient(160deg,#F3F1EA,#DFE5DD);display:flex;align-items:center;justify-content:center;box-shadow:inset 0 0 0 1px rgba(34,38,31,.1)}
+.alert .ico svg{width:26px;height:26px;color:var(--green)}
+.alert b{font-size:13px;font-weight:650;display:block}
+.alert p{margin:6px 0 0;font-size:11.5px;color:var(--ink2);line-height:1.55}
+.alert .bar{height:5px;border-radius:3px;background:#E4E3DC;margin-top:11px;overflow:hidden}
+.alert .bar i{display:block;height:100%;width:42%;background:var(--green);border-radius:3px}
+.alert .btns{display:flex;justify-content:flex-end;gap:8px;margin-top:14px;flex-wrap:wrap}
+.abtn{border:1px solid rgba(34,38,31,.18);background:#fff;border-radius:6px;padding:5px 12px;font:inherit;font-size:12px;cursor:pointer}
+.abtn.def{background:var(--green);border-color:var(--green);color:#fff;font-weight:600}
+.notes-rn{background:#fff;border:1px solid var(--panel-line);border-radius:7px;padding:9px 11px;margin-top:11px;font-size:11px;color:var(--ink2);line-height:1.6}
+.notes-rn b{font-size:11px}
+
+/* ─── misc blocks ─────────────────────────────────────────── */
+.split{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:22px}
+.box{background:var(--paper2);border:1px solid var(--line);border-radius:12px;padding:18px 20px}
+.box h5{margin:0 0 8px;font-size:13px;font-weight:650}
+.box p{margin:0;font-size:12.5px;color:var(--ink2);line-height:1.7}
+.box ul{margin:8px 0 0;padding-left:18px;font-size:12.5px;color:var(--ink2);line-height:1.75}
+.tbl{width:100%;border-collapse:collapse;font-size:12.5px}
+.tbl th,.tbl td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+.tbl th{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);font-weight:600}
+.tbl td code{font:inherit;font-family:var(--mono);font-size:11.5px;background:#fff;border:1px solid var(--line);border-radius:4px;padding:1px 5px}
+.chgs{list-style:none;margin:0;padding:0;counter-reset:c}
+.chgs li{counter-increment:c;background:var(--paper2);border:1px solid var(--line);border-radius:12px;padding:16px 18px 16px 52px;position:relative;margin-bottom:12px}
+.chgs li::before{content:counter(c);position:absolute;left:18px;top:15px;width:22px;height:22px;border-radius:50%;background:var(--green);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.chgs b{display:block;font-size:13px;margin-bottom:4px}
+.chgs p{margin:0;font-size:12px;line-height:1.75;color:var(--ink2)}
+.tag{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.06em;padding:2px 6px;border-radius:4px;margin-left:8px;vertical-align:2px}
+.tag.new{background:var(--amber-soft);color:var(--amber);box-shadow:inset 0 0 0 1px var(--amber-line)}
+.tag.same{background:var(--green-soft);color:var(--green-d);box-shadow:inset 0 0 0 1px var(--green-line)}
+footer{margin-top:70px;padding-top:22px;border-top:1px solid var(--line);font-size:11.5px;color:var(--ink3)}
+[inert]{cursor:default}
+@media(max-width:420px){.wrap{padding:0 14px 70px}h1{font-size:29px}.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<nav class="toc" aria-label="Sections">
+  <ul>
+    <li><a href="#model">1. State model</a></li>
+    <li><a href="#proto">2. Prototype</a></li>
+    <li><a href="#overview">3. All screens</a></li>
+    <li><a href="#menubar">4. Status icon</a></li>
+    <li><a href="#updates">5. Updates</a></li>
+    <li><a href="#changes">6. 提案する挙動変更</a></li>
+    <li><a href="#matrix">7. State matrix</a></li>
+  </ul>
+</nav>
+
+<div class="wrap">
+
+<header class="masthead">
+  <p class="eyebrow">Shade · macOS menu panel · design proposal</p>
+  <h1>Intent is a switch.<br>Activity is a state.</h1>
+  <p class="lede">The current panel merges “what the user asked for” with “what Shade is doing right now”, so the battery and disabled cases read as a dead end. This redesign keeps one 320&nbsp;pt panel but always answers three questions at a glance: <b>is Shade on?</b> · <b>is it actually running?</b> · <b>what do I press next?</b></p>
+</header>
+
+<!-- ══════════════ 1. MODEL ══════════════ -->
+<section id="model">
+  <h2>1 · State model</h2>
+  <h3>One switch, three runtime states, one blocker</h3>
+  <p class="section-note">Every screen below is produced by the same four inputs: user <b>intent</b>, <b>power source</b>, the <b>Only&nbsp;on&nbsp;power&nbsp;adapter</b> setting, and the runtime <b>phase</b>. Nothing else is hidden in the UI.</p>
+  <div class="split">
+    <div class="box">
+      <h5>Intent — the switch in the header</h5>
+      <p>The switch means “I want Shade running”, nothing more. It stays <b>on</b> while Shade is paused on battery, because the user never asked for it to stop. It is only ever off because the user turned it off.</p>
+    </div>
+    <div class="box">
+      <h5>Activity — the ON/OFF pill + status line</h5>
+      <p>Green pill = assertions held, display managed. Amber outlined pill = intent kept, but Shade is not running. Grey pill = nothing held. The line beside it says the reason in plain words.</p>
+    </div>
+    <div class="box">
+      <h5>Blocker — an actionable card, never a bare grey button</h5>
+      <p>When the power policy prevents starting, the panel names the setting that is blocking it and offers the one-tap fix. A disabled control without a stated cause is the bug this redesign fixes.</p>
+    </div>
+  </div>
+
+  <div style="margin-top:26px;overflow-x:auto">
+  <svg viewBox="0 0 940 232" width="940" height="232" role="img" aria-label="State diagram: Off, Armed countdown, Dimmed, Paused, and Battery-blocked, with the transitions between them." style="max-width:100%;height:auto">
+    <defs>
+      <marker id="ah" markerWidth="9" markerHeight="9" refX="7.4" refY="3.2" orient="auto"><path d="M0 0 L7.4 3.2 L0 6.4 z" fill="#8D9288"/></marker>
+    </defs>
+    <g font-family="-apple-system,BlinkMacSystemFont,sans-serif">
+      <!-- OFF -->
+      <rect x="16" y="86" width="150" height="60" rx="12" fill="#F4F3EE" stroke="#D6D3C9"/>
+      <text x="91" y="110" font-size="13" font-weight="600" text-anchor="middle" fill="#22261F">Off</text>
+      <text x="91" y="128" font-size="10.5" text-anchor="middle" fill="#8D9288">intent off · idle</text>
+      <!-- ARMED -->
+      <rect x="290" y="24" width="176" height="64" rx="12" fill="#E7EFE8" stroke="#C9DBCE"/>
+      <text x="378" y="49" font-size="13" font-weight="600" text-anchor="middle" fill="#2E5643">Armed — counting down</text>
+      <text x="378" y="68" font-size="10.5" text-anchor="middle" fill="#5B7F6B">“Dimming in 0:47” · max = chosen delay</text>
+      <!-- DIMMED -->
+      <rect x="596" y="24" width="176" height="64" rx="12" fill="#2E3A33" stroke="#25302A"/>
+      <text x="684" y="49" font-size="13" font-weight="600" text-anchor="middle" fill="#F2F4EF">Dimmed</text>
+      <text x="684" y="68" font-size="10.5" text-anchor="middle" fill="#A9B6AC">brightness 0 · Mac awake</text>
+      <!-- PAUSED -->
+      <rect x="290" y="152" width="176" height="64" rx="12" fill="#F7F0DF" stroke="#E5D5B2"/>
+      <text x="378" y="177" font-size="13" font-weight="600" text-anchor="middle" fill="#8F6A20">Paused — awaiting power</text>
+      <text x="378" y="196" font-size="10.5" text-anchor="middle" fill="#9C7C36">intent ON · nothing held</text>
+      <!-- BLOCKED -->
+      <rect x="596" y="152" width="176" height="64" rx="12" fill="#F4F3EE" stroke="#D6D3C9" stroke-dasharray="4 3"/>
+      <text x="684" y="177" font-size="13" font-weight="600" text-anchor="middle" fill="#22261F">Unavailable on battery</text>
+      <text x="684" y="196" font-size="10.5" text-anchor="middle" fill="#8D9288">intent off · can’t start</text>
+
+      <g stroke="#8D9288" stroke-width="1.4" fill="none" marker-end="url(#ah)">
+        <path d="M166 108 C 220 108, 232 60, 286 58"/>
+        <path d="M466 44 L 592 44"/>
+        <path d="M684 88 C 684 118, 500 116, 470 70"/>
+        <path d="M378 88 L 378 148"/>
+        <path d="M340 148 C 300 128, 232 128, 190 120" />
+        <path d="M684 148 C 684 120, 520 118, 470 74" stroke-dasharray="4 3"/>
+        <path d="M166 128 C 300 168, 480 190, 592 188" stroke-dasharray="4 3"/>
+      </g>
+      <g font-size="10" fill="#6E7469">
+        <text x="196" y="76">Turn On</text>
+        <text x="492" y="36">delay elapses / Dim Now</text>
+        <text x="500" y="112">Restore · ⌃⌥⌘D · brightness-up · wake on touch</text>
+        <text x="386" y="122">unplug</text>
+        <text x="238" y="150">Turn Off</text>
+        <text x="500" y="146">reconnect → fresh countdown</text>
+        <text x="332" y="212">unplug while off</text>
+      </g>
+      <text x="592" y="126" font-size="10" fill="#9C7C36" text-anchor="end">reconnect ↗</text>
+    </g>
+  </svg>
+  </div>
+  <p class="ja" style="margin-top:14px"><b>意図と実状態の分離：</b>スイッチは「ユーザーの意思」だけを表し、実際に動いているかはピル（ON緑／ON琥珀＝一時停止／OFF灰）と状態行で表す。バッテリー時の不可状態は「無効化されたボタン」ではなく、原因の設定名と 1 タップの解決策を示すカードとして提示する。</p>
+</section>
+
+<!-- ══════════════ 2. PROTOTYPE ══════════════ -->
+<section id="proto">
+  <h2>2 · Interactive prototype</h2>
+  <h3>Click through the whole system</h3>
+  <p class="section-note">A live model of the panel with a simulated menu bar and a simulated power adapter. Nothing here touches a display, power state, or the network — it is a drawing that keeps state. Single-click the ◐ icon to open or close the panel; double-click or right-click it to toggle Shade.</p>
+
+  <div class="proto">
+    <div class="desk">
+      <div class="menubar">
+        <span style="font-size:11px;color:#6E7469">Simulated menu bar</span>
+        <button class="mb-i" id="mbIcon" aria-label="Shade status icon — click to open panel, double-click to toggle">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.9" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.1 A6.9 6.9 0 0 0 8 14.9 Z" fill="currentColor"/></svg>
+        </button>
+        <span id="mbClock" style="font-variant-numeric:tabular-nums">9:41</span>
+      </div>
+      <div class="desk-body"><div id="protoStage"></div></div>
+      <p class="tooltip" id="mbTip">Tooltip: Shade · Off</p>
+    </div>
+
+    <div class="sim">
+      <h4>Simulator</h4>
+      <p class="k">Outside the app frame — these controls do not exist in Shade.</p>
+
+      <div class="simrow">
+        <span class="lbl">Power source</span>
+        <div class="seg" role="group" aria-label="Power source">
+          <button id="pwAC" aria-pressed="true">Power adapter</button>
+          <button id="pwBat" aria-pressed="false">Battery</button>
+        </div>
+      </div>
+      <div class="simrow">
+        <span class="lbl">Clock speed</span>
+        <div class="seg" role="group" aria-label="Simulated clock speed">
+          <button id="sp1" aria-pressed="false">×1</button>
+          <button id="sp10" aria-pressed="true">×10</button>
+        </div>
+      </div>
+      <div class="simrow">
+        <span class="lbl">Hardware input</span>
+        <button class="act" id="simInput">Move trackpad / type</button>
+      </div>
+      <div class="simrow">
+        <span class="lbl">Brightness-up key</span>
+        <button class="act" id="simBright">Press ☀︎ F2</button>
+      </div>
+      <div class="simrow">
+        <span class="lbl">Global shortcut</span>
+        <button class="act" id="simHotkey">Press ⌃⌥⌘D</button>
+      </div>
+      <div class="simrow">
+        <span class="lbl">Next update check</span>
+        <div class="seg" role="group" aria-label="Update check result">
+          <button id="upNone" aria-pressed="true">Up to date</button>
+          <button id="upNew" aria-pressed="false">1.1 available</button>
+        </div>
+      </div>
+      <div class="simrow">
+        <span class="lbl">Inject error</span>
+        <button class="act" id="simErr">Brightness restore fails</button>
+        <button class="act" id="simReset">Reset</button>
+      </div>
+
+      <div class="log">
+        <h4 style="margin-bottom:8px">Event log</h4>
+        <ol id="log" aria-live="polite"></ol>
+      </div>
+    </div>
+  </div>
+  <p class="ja" style="margin-top:18px"><b>試す順序の例：</b>①「Power adapter」で Turn On → カウントダウン →「Dim Now」→「Restore Display」で満了時間から再スタート。②実行中に「Battery」へ切替 → Paused（スイッチは ON のまま琥珀）。③「Power adapter」に戻す → 自動再開。④ Paused で「Turn Off」→ 再接続しても復帰しない。⑤ OFF のままバッテリーへ → 不可カードと「Allow on Battery」。</p>
+</section>
+
+<!-- ══════════════ 3. OVERVIEW ══════════════ -->
+<section id="overview">
+  <h2>3 · All screens</h2>
+  <h3>Every state, side by side</h3>
+  <p class="section-note">Static frames — no tabs, no pickers, nothing folded away. Each frame carries an “Open in prototype” button that loads exactly that state into section 2.</p>
+  <div class="grid" id="gallery"></div>
+</section>
+
+<!-- ══════════════ 4. MENU BAR ══════════════ -->
+<section id="menubar">
+  <h2>4 · Status icon</h2>
+  <h3>One icon, three gestures</h3>
+  <div class="split">
+    <div class="box">
+      <h5>Appearance</h5>
+      <p>The icon is a filled half-circle. When Shade is not running it renders <b>dimmed</b> (macOS <code style="font-family:var(--mono);font-size:11.5px">appearsDisabled</code>); while paused it is dimmed too, because nothing is being held — the panel is where intent lives.</p>
+      <ul>
+        <li>Running — full contrast, tooltip “Shade · Keeping Mac awake”</li>
+        <li>Paused — dimmed, tooltip “Shade · Paused, waiting for power”</li>
+        <li>Off — dimmed, tooltip “Shade · Off”</li>
+        <li>Unavailable — dimmed, tooltip “Shade · Needs a power adapter”</li>
+      </ul>
+    </div>
+    <div class="box">
+      <h5>Gestures</h5>
+      <table class="tbl">
+        <tr><th>Gesture</th><th>Result</th></tr>
+        <tr><td>Single click</td><td>Opens the panel, after the system double-click interval so a double never flashes it.</td></tr>
+        <tr><td>Double click</td><td>Toggles intent without opening the panel.</td></tr>
+        <tr><td>Right click</td><td>Toggles intent without opening the panel.</td></tr>
+      </table>
+      <p style="margin-top:10px;font-size:11.5px">If a toggle attempt is blocked by the power policy, the panel opens on the blocked screen instead of failing silently.<span class="tag new">proposed</span></p>
+    </div>
+  </div>
+  <p class="ja" style="margin-top:16px"><b>注記：</b>現行実装ではダブル／右クリックのトグルがバッテリーで拒否されると <code>error</code> が設定されるがパネルは開かないため、ユーザーには「何も起きない」ように見える。上記はその一点のみの変更提案。</p>
+</section>
+
+<!-- ══════════════ 5. UPDATES ══════════════ -->
+<section id="updates">
+  <h2>5 · Sparkle</h2>
+  <h3>Update dialogs (illustrative)</h3>
+  <p class="section-note">Sparkle owns these windows; they are drawn here only to show the visual fit with the panel. Settings → <b>Check for Updates…</b> triggers them. No network request is made anywhere in this file.</p>
+  <div class="alerts">
+    <div class="alert" inert>
+      <div class="ico"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.9" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.1 A6.9 6.9 0 0 0 8 14.9 Z" fill="currentColor"/></svg></div>
+      <div style="flex:1">
+        <b>Checking for updates…</b>
+        <p>Contacting the Shade release feed on GitHub.</p>
+        <div class="bar"><i></i></div>
+        <div class="btns"><button class="abtn">Cancel</button></div>
+      </div>
+    </div>
+    <div class="alert" inert>
+      <div class="ico"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.9" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.1 A6.9 6.9 0 0 0 8 14.9 Z" fill="currentColor"/></svg></div>
+      <div style="flex:1">
+        <b>You’re up to date</b>
+        <p>Shade 1.0.2 is the newest version available.</p>
+        <div class="btns"><button class="abtn def">OK</button></div>
+      </div>
+    </div>
+    <div class="alert" inert>
+      <div class="ico"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.9" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.1 A6.9 6.9 0 0 0 8 14.9 Z" fill="currentColor"/></svg></div>
+      <div style="flex:1">
+        <b>Shade 1.1 is available</b>
+        <p>You have 1.0.2. Would you like to download it now?</p>
+        <div class="notes-rn"><b>What’s new</b><br>· Faster brightness restore after a crash<br>· Wake on touch ignores the dimming gesture itself<br>· Clearer battery and paused states</div>
+        <div class="btns">
+          <button class="abtn">Skip This Version</button>
+          <button class="abtn">Remind Me Later</button>
+          <button class="abtn def">Install Update</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ 6. CHANGES ══════════════ -->
+<section id="changes">
+  <h2>6 · Proposed behavior changes</h2>
+  <h3>挙動変更の提案（実装は未承認）</h3>
+  <p class="section-note">Everything not listed here is a visual restatement of the shipped behavior in <code style="font-family:var(--mono);font-size:12px">AppModel.swift</code> / <code style="font-family:var(--mono);font-size:12px">Views.swift</code>. The items below change what the app <em>does</em> and need approval before implementation.</p>
+  <ol class="chgs">
+    <li>
+      <b>“Allow on Battery” button inside the blocked card<span class="tag new">behavior</span></b>
+      <p>ブロック中のパネルから <code>onlyOnPowerAdapter</code> を直接 false にし、そのまま起動する。現行は Settings を開いてトグルを探す必要があり、無効理由と解決策が分離している。書き込む設定名をカード本文に明示するため、意図しない変更にはならない想定。</p>
+    </li>
+    <li>
+      <b>Paused keeps the switch visibly ON, in amber<span class="tag new">visual + semantics</span></b>
+      <p>現行も <code>isOn || waitingForPower</code> でスイッチは ON に見えるが、緑のまま「動作中」と区別がつかない。琥珀＋アウトラインのピルで「意図は保持、実行はしていない」を明示する。ロジック変更なし、表示のみ。</p>
+    </li>
+    <li>
+      <b>Countdown shows progress against the chosen delay<span class="tag new">visual</span></b>
+      <p>残り時間だけでなく「1 min のうち」の帯を出す。<code>reserve()</code> によるカウントダウン再武装が上限を超えないことが目で確認でき、「思ったより長い／短い」という混乱を防ぐ。</p>
+    </li>
+    <li>
+      <b>Blocked toggle from the status icon opens the panel<span class="tag new">behavior</span></b>
+      <p>ダブル／右クリックでの起動がパワーポリシーで拒否された場合、無反応ではなくブロック画面を開く。</p>
+    </li>
+    <li>
+      <b>Inline shortcut validation and conflict text<span class="tag new">copy</span></b>
+      <p>修飾キー不足は「Add ⌘, ⌃, or ⌥」、他アプリとの競合は競合したキー表記を含む一文をフィールド直下に赤で出す。現行は登録失敗を汎用エラー行で伝えている。</p>
+    </li>
+    <li>
+      <b>Settings marks the setting that is blocking right now<span class="tag same">visual</span></b>
+      <p>バッテリー動作中で <code>onlyOnPowerAdapter</code> が ON の場合、その行に「ON BATTERY」バッジを付ける。設定画面と主画面の因果を結ぶ。</p>
+    </li>
+  </ol>
+  <div class="box" style="margin-top:22px">
+    <h5>Unchanged, deliberately</h5>
+    <p>320&nbsp;pt 幅・単一パネル内の Settings/Tutorial・手動 OFF 起動・8 時間上限・ロック設定を触らない方針・外部ディスプレイ非対応・「これはセキュリティではない」という位置づけ。チュートリアル下部の赤い 2 行は仕様どおり最下部に固定し、「Don’t show on startup」は初期状態で未チェック。</p>
+  </div>
+</section>
+
+<!-- ══════════════ 7. MATRIX ══════════════ -->
+<section id="matrix">
+  <h2>7 · State matrix</h2>
+  <h3>What the panel says, for every combination</h3>
+  <div style="overflow-x:auto">
+  <table class="tbl">
+    <thead><tr><th>Intent</th><th>Power</th><th>Adapter-only</th><th>Switch</th><th>Pill · status line</th><th>Headline</th><th>Primary button</th></tr></thead>
+    <tbody>
+      <tr><td>Off</td><td>AC</td><td>on/off</td><td>off, enabled</td><td>OFF</td><td>Ready to dim</td><td><code>Turn On</code></td></tr>
+      <tr><td>Off</td><td>Battery</td><td>on</td><td>off, <b>disabled</b></td><td>OFF · On battery</td><td>Needs a power adapter</td><td><code>Turn On</code> disabled + blocked card</td></tr>
+      <tr><td>Off</td><td>Battery</td><td>off</td><td>off, enabled</td><td>OFF</td><td>Ready to dim</td><td><code>Turn On</code></td></tr>
+      <tr><td>On</td><td>AC</td><td>on/off</td><td>on, green</td><td>ON · Keeping Mac awake</td><td>Dimming in m:ss</td><td><code>Dim Now</code></td></tr>
+      <tr><td>On</td><td>AC</td><td>on/off</td><td>on, green</td><td>ON · Keeping Mac awake</td><td>Display dimmed</td><td><code>Restore Display</code></td></tr>
+      <tr><td>On</td><td>Battery</td><td>on</td><td>on, <b>amber</b></td><td>ON · Paused</td><td>Waiting for power adapter</td><td><code>Turn Off</code> (cancels auto-resume)</td></tr>
+      <tr><td>On</td><td>Battery</td><td>off</td><td>on, green</td><td>ON · Keeping Mac awake</td><td>Dimming in m:ss</td><td><code>Dim Now</code></td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="ja" style="margin-top:14px"><b>読み方：</b>スイッチ列が「意図」、ピル列が「実際」。両者が食い違うのは 1 行（Paused）だけで、その行だけが琥珀になる。ここが現行 UI で最も混乱していた箇所。</p>
+</section>
+
+<footer>
+  <p>mock-opus.html — self-contained design proposal for Shade. No external assets, fonts, scripts, or network requests. System font stack only. All display, power, and update behavior is simulated in-page.<br>
+  Sources read: <code style="font-family:var(--mono)">Sources/Shade/{AppModel,Views,PanelRoot,main}.swift</code>, <code style="font-family:var(--mono)">docs/mock.html</code>, <code style="font-family:var(--mono)">README.md</code>. Implementation requires separate approval.</p>
+</footer>
+
+</div>
+
+<script>
+"use strict";
+/* ─────────────────────────────────────────────────────────────
+   Shared model. The overview gallery and the live prototype are
+   rendered by exactly the same functions, so they cannot drift.
+   ───────────────────────────────────────────────────────────── */
+
+const DELAYS = {30:"30 sec", 60:"1 min", 180:"3 min", 300:"5 min"};
+const VERSION = "1.0.2";
+
+const DEFAULTS = {
+  intent:false,          // user's wish: the header switch
+  phase:"armed",         // runtime phase when active: "armed" | "dimmed"
+  power:"ac",            // "ac" | "battery"
+  adapterOnly:true,
+  delay:60,
+  remaining:60,
+  wakeOnTouch:false,
+  login:false,
+  shortcut:"⌃⌥⌘D",
+  page:"main",           // "main" | "settings" | "tutorial"
+  recording:false,
+  recErr:null,
+  error:null,
+  errorAction:null,
+  ignore:0,              // seconds left in the post-dim ignore window
+  hideTutorial:false
+};
+
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt = s => { s = Math.max(0, Math.ceil(s)); return Math.floor(s/60) + ":" + String(s%60).padStart(2,"0"); };
+const delayLabel = d => DELAYS[d] || d + " sec";
+
+/* Derived truth — never stored, so the states can never contradict. */
+function derive(s){
+  const canRun  = !s.adapterOnly || s.power === "ac";
+  const active  = s.intent && canRun;
+  const paused  = s.intent && !canRun;
+  const blocked = !s.intent && !canRun;
+  return {canRun, active, paused, blocked,
+          dimmed: active && s.phase === "dimmed",
+          armed:  active && s.phase === "armed"};
+}
+
+/* ── icons ───────────────────────────────────────────────── */
+const ICON_SHADE = '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.9" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.1 A6.9 6.9 0 0 0 8 14.9 Z" fill="currentColor"/></svg>';
+const ICON_BATT  = '<svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="1" y="4.5" width="11.5" height="7" rx="2"/><path d="M14.4 7.2v1.6" stroke-linecap="round"/><rect x="2.7" y="6.2" width="3" height="3.6" rx="1" fill="currentColor" stroke="none"/></svg>';
+const ICON_WARN  = '<svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.35"><path d="M8 1.9 15 14H1z" stroke-linejoin="round"/><path d="M8 6.2v3.4M8 11.6v.1" stroke-linecap="round"/></svg>';
+
+/* ── panel renderer ──────────────────────────────────────── */
+function renderPanel(s){
+  const st = Object.assign({}, DEFAULTS, s);
+  if (st.page === "settings") return settingsPage(st);
+  if (st.page === "tutorial") return tutorialPage(st);
+  return mainPage(st);
+}
+
+function mainPage(s){
+  const d = derive(s);
+
+  const pillCls  = d.active ? "on" : d.paused ? "paused" : "";
+  const pillText = (d.active || d.paused) ? "ON" : "OFF";
+  const status =
+      d.dimmed  ? "Keeping Mac awake"
+    : d.armed   ? "Keeping Mac awake"
+    : d.paused  ? "Paused"
+    : d.blocked ? "On battery"
+    :             "";
+
+  const headline =
+      d.dimmed  ? "Display dimmed"
+    : d.armed   ? "Dimming in " + fmt(s.remaining)
+    : d.paused  ? "Waiting for power adapter"
+    : d.blocked ? "Needs a power adapter"
+    :             "Ready to dim";
+
+  const sub = !d.active && !d.paused && !d.blocked ? "Auto-dim after " + delayLabel(s.delay) : "";
+
+  /* countdown meter, capped at the chosen delay */
+  let meter = "";
+  if (d.armed){
+    const pct = Math.max(0, Math.min(100, (s.remaining / s.delay) * 100));
+    meter = '<div class="meter"><i style="width:' + pct.toFixed(1) + '%"></i></div>'
+          ;
+  }
+
+  /* cards */
+  let card = "";
+  if (d.blocked){
+    card =
+      '<div class="card amber">' + ICON_BATT + '<div><b>Only on power adapter</b>'
+      + '<div class="card-acts">'
+      + '<button class="mini solid" data-act="allowBattery">Allow on Battery</button>'
+      + '</div></div></div>';
+  } else if (d.paused){
+    card =
+      '<div class="card amber">' + ICON_BATT + '<div>Resumes when reconnected.</div></div>';
+  }
+  if (s.error){
+    card += '<div class="card red">' + ICON_WARN + '<div><b>' + esc(s.error.title) + '</b>' + esc(s.error.body)
+      + (s.errorAction ? '<div class="card-acts"><button class="mini solid red" data-act="' + esc(s.errorAction.act)
+          + '">' + esc(s.errorAction.label) + '</button></div>' : '')
+      + '</div></div>';
+  }
+
+  /* primary action */
+  const btnLabel =
+      d.dimmed  ? "Restore Display"
+    : d.armed   ? "Dim Now"
+    : d.paused  ? "Turn Off"
+    :             "Turn On";
+  const btnCls  = d.paused ? "neutral" : "primary";
+  const btnAct  = d.dimmed ? "restore" : d.armed ? "dim" : d.paused ? "turnOff" : "turnOn";
+  const btnOff  = d.blocked ? " disabled" : "";
+
+  /* Show recovery guidance only when the display is dimmed. */
+  let hint = "";
+  if (d.dimmed){
+    hint = "Restore: brightness-up or <kbd>" + esc(s.shortcut) + "</kbd>";
+    if (s.wakeOnTouch)
+      hint += "<br>Or move the trackpad.";
+  } else if (d.paused){
+    hint = "Turn Off cancels auto-resume.";
+  }
+
+  const swDisabled = d.blocked;
+  const swOn = d.active || d.paused;
+
+  return '<div class="panel" data-panel>'
+    + '<div class="p-head">'
+    +   '<div class="brand">' + ICON_SHADE + 'Shade</div>'
+    +   '<button class="sw' + (d.paused ? " amber" : "") + '" role="switch" aria-checked="' + swOn + '"'
+    +     (swDisabled ? ' aria-disabled="true" title="Connect a power adapter, or turn off Only on power adapter."' : '')
+    +     ' aria-label="Shade" data-act="' + (swDisabled ? "blockedNudge" : "toggle") + '"></button>'
+    + '</div>'
+    + '<div class="chip"><span class="pill ' + pillCls + '">' + pillText + '</span>'
+    +   '<span class="chip-t' + (d.paused || d.blocked ? " warn" : "") + '">' + esc(status) + '</span></div>'
+    + '<div class="headline">' + esc(headline) + '</div>'
+    + (sub ? '<div class="sub">' + esc(sub) + '</div>' : '')
+    + meter
+    + card
+    + '<button class="btn ' + btnCls + '" data-act="' + btnAct + '"' + btnOff + '>' + esc(btnLabel) + '</button>'
+    + (hint ? '<div class="hint">' + hint + '</div>' : '')
+    + '<div class="p-foot"><button class="link" data-act="settings">Settings ›</button>'
+    +   '<button class="link" data-act="quit">Quit</button></div>'
+    + '</div>';
+}
+
+function settingsPage(s){
+  const d = derive(s);
+  const blockingNow = s.adapterOnly && s.power === "battery" && (s.intent || d.blocked);
+
+  const keyCls = s.recording ? (s.recErr ? "keyfield rec bad" : "keyfield rec") : "keyfield";
+  const keyTxt = s.recording ? "Press keys…" : s.shortcut;
+
+  let recExtra = "";
+  if (s.recording){
+    recExtra += '<div class="recbar"><span>Include ⌘, ⌃ or ⌥ · Esc cancels</span>'
+             +  '<button class="mini ghost" data-act="cancelRec">Cancel</button></div>';
+    if (s.recErr) recExtra += '<div class="recerr">' + ICON_WARN + '<span>' + esc(s.recErr) + '</span></div>';
+  }
+
+  const sw = (label, on, act) =>
+    '<button class="sw sm" role="switch" aria-checked="' + !!on + '" aria-label="' + esc(label) + '" data-act="' + act + '"></button>';
+
+  const rows =
+      '<div class="row"><div class="rl"><span>Dim after</span></div>'
+    +   '<select class="pick" aria-label="Dim after" data-act="delay">'
+    +     Object.keys(DELAYS).map(k => '<option value="' + k + '"' + (Number(k) === s.delay ? " selected" : "") + '>' + DELAYS[k] + '</option>').join("")
+    +   '</select></div>'
+    + '<div class="row"><div class="rl"><span>Shortcut</span></div>'
+    +   '<button class="' + keyCls + '" data-act="record">' + esc(keyTxt) + '</button></div>'
+    + (recExtra ? '<div style="padding-top:2px">' + recExtra + '</div>' : "")
+    + '<div class="row"><div class="rl"><span>Wake on touch</span><small>Move the trackpad or type to restore.</small></div>'
+    +   sw("Wake on touch", s.wakeOnTouch, "wake") + '</div>'
+    + '<div class="row"><div class="rl"><span>Only on power adapter '
+    +   (blockingNow ? '<span class="badge">ON BATTERY</span>' : "")
+    +   '</span><small>Pause on battery. Resume on power.</small></div>'
+    +   sw("Only on power adapter", s.adapterOnly, "adapterOnly") + '</div>'
+    + '<div class="row"><div class="rl"><span>Launch at login</span></div>'
+    +   sw("Launch at login", s.login, "login") + '</div>';
+
+  const err = s.error
+    ? '<div class="card red">' + ICON_WARN + '<div><b>' + esc(s.error.title) + '</b>' + esc(s.error.body) + '</div></div>'
+    : "";
+
+  return '<div class="panel" data-panel>'
+    + '<div class="s-head"><button class="link" data-act="back">‹ Back</button><b>Settings</b><span></span></div>'
+    + '<div class="group">' + rows + '</div>'
+    + err
+    + '<div class="s-foot"><button class="link" data-act="tutorial">Tutorial</button>'
+    +   '<button class="link" data-act="checkUpdates">Check for Updates…</button></div>'
+    + '<div class="ver">Version ' + VERSION + '</div>'
+    + '</div>';
+}
+
+function tutorialPage(s){
+  return '<div class="panel" data-panel>'
+    + '<div class="brand">' + ICON_SHADE + 'Shade</div>'
+    + '<h1 class="t-title">A dark display.<br>A working Mac.</h1>'
+    + '<p class="t-copy">Keep Computer Use running with your display dimmed.</p>'
+    + '<div class="t-rule">'
+    +   '<div class="kb" role="img" aria-label="Mac keyboard, brightness-up F2 key with F1, F3 and the number row beside it">'
+    +     '<i class="f f1"><em>☀︎</em><small>F1</small></i>'
+    +     '<i class="f f2"><em>☀︎</em><small>F2</small></i>'
+    +     '<i class="f f3"><em>▣</em><small>F3</small></i>'
+    +     '<i class="n n1">1</i><i class="n n2">2</i>'
+    +   '</div>'
+    +   '<div class="t-rec"><b>Need your screen back?</b>'
+    +     '<span>Press the brightness-up key.</span>'
+    +     '<span>Or press ' + esc(s.shortcut) + '.</span></div>'
+    + '</div>'
+    + '<label class="t-check"><input type="checkbox" data-act="hideTutorial"' + (s.hideTutorial ? " checked" : "") + '>Don’t show on startup</label>'
+    + '<button class="btn primary" data-act="startUsing">Start using Shade</button>'
+    + '<p class="t-warn">Dimming doesn’t lock your Mac.<br>Shade is a privacy band-aid, not security.</p>'
+    + '</div>';
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Overview gallery — static frames built from the same renderer
+   ───────────────────────────────────────────────────────────── */
+
+const SCREENS = [
+  { id:"tutorial", t:"First launch · tutorial",
+    s:"Shown on every launch until dismissed. Shade starts off.",
+    ja:"起動時チュートリアル。<b>「Don’t show on startup」は初期状態で未チェック</b>。赤い警告 2 行は仕様どおり最下部。輝度アップキー（F2）の図解は近接キー込みで、復帰手段を横に並置。",
+    st:{page:"tutorial"} },
+
+  { id:"off-ac", t:"Off · on power adapter",
+    s:"The neutral resting state after the tutorial.",
+    ja:"手動 OFF の初期状態。ピルは灰 OFF、見出しは「Ready to dim」。副題で選択中の遅延を必ず示すので、Settings を開かずに何秒後に暗くなるか分かる。",
+    st:{} },
+
+  { id:"armed", t:"On · countdown",
+    s:"Assertions held, brightness still up.",
+    ja:"実行中。帯は<b>選択した遅延に対する残量</b>で、上限を超えないことが視覚的に保証される。ハードウェア入力で再武装しても帯は満タンに戻るだけ。",
+    st:{intent:true, phase:"armed", remaining:47} },
+
+  { id:"dimmed", t:"Dimmed · restore available",
+    s:"Brightness zero, Mac awake, Computer Use continues.",
+    ja:"暗転中。主ボタンは「Restore Display」。復帰キーだけを短く表示する。",
+    st:{intent:true, phase:"dimmed"} },
+
+  { id:"dimmed-ignore", t:"Dimmed · Wake on touch",
+    s:"Move the trackpad to restore the display.",
+    ja:"Wake on touch 有効時は、トラックパッドで復帰できることだけを表示する。",
+    st:{intent:true, phase:"dimmed", wakeOnTouch:true, ignore:1.6} },
+
+  { id:"blocked", t:"Off on battery · adapter-only ON",
+    s:"The screen this redesign exists for.",
+    ja:"<b>本件の中心。</b>スイッチと Turn On は無効のままだが、原因の設定名・理由・解決策をカードで提示する。「Allow on Battery」は <code>onlyOnPowerAdapter</code> を OFF にしてそのまま起動する提案（挙動変更）。Settings へは常に到達可能。",
+    st:{power:"battery"} },
+
+  { id:"paused", t:"Paused · awaiting automatic resume",
+    s:"Intent kept, nothing held.",
+    ja:"実行中に電源を抜いた場合。輝度は復元しアサーションは解放済み。<b>スイッチは ON のまま琥珀</b>で「意図は保持、実行はしていない」を表す。主ボタンは Turn Off ＝自動再開のキャンセル。",
+    st:{intent:true, power:"battery", remaining:60} },
+
+  { id:"battery-ok", t:"Running on battery · adapter-only OFF",
+    s:"The result of turning the power policy off.",
+    ja:"アダプター限定を OFF にした後の状態。バッテリーでも通常どおり動作し、ピルは緑に戻る。ブロック画面から 1 タップでここへ到達できることが設計の狙い。",
+    st:{intent:true, power:"battery", adapterOnly:false, delay:180, remaining:132} },
+
+  { id:"settings", t:"Settings · same panel",
+    s:"No separate window, no preferences popup.",
+    ja:"設定は同一パネル内。自明な項目の説明は省き、動作の補足だけを残す。フッターに Tutorial / Check for Updates… / バージョン。",
+    st:{page:"settings", intent:true, remaining:47} },
+
+  { id:"settings-blocking", t:"Settings while blocked",
+    s:"The blocking setting names itself.",
+    ja:"バッテリー かつ アダプター限定 ON のとき、その行に「ON BATTERY」バッジを付ける。主画面のブロック理由と設定行が視覚的に結び付く。",
+    st:{page:"settings", power:"battery"} },
+
+  { id:"record", t:"Shortcut · recording",
+    s:"Field is live; Escape cancels; Cancel is explicit.",
+    ja:"録音中はフィールドが緑枠になり、必要な修飾キーと Esc での取り消しを直下に表示。取り消し手段をキーだけに頼らず Cancel ボタンも置く。",
+    st:{page:"settings", recording:true} },
+
+  { id:"record-invalid", t:"Shortcut · invalid combination",
+    s:"A bare key is rejected without leaving the recorder.",
+    ja:"修飾キーなしの入力は却下し、録音は継続する。何を足せばよいかを赤で明示。",
+    st:{page:"settings", recording:true, recErr:"Add ⌘, ⌃, or ⌥ to the combination."} },
+
+  { id:"record-conflict", t:"Shortcut · conflict",
+    s:"Another app already owns the combination.",
+    ja:"Carbon のホットキー登録に失敗した場合。競合したキー表記を含めて具体的に示し、そのまま次の入力を受け付ける。",
+    st:{page:"settings", recording:true, recErr:"⌃⌥⌘Q is already used by another app. Try another combination."} },
+
+  { id:"err-restore", t:"Error · brightness restore failed",
+    s:"Recoverable, with the hardware fallback stated.",
+    ja:"復元失敗。再試行ボタンを与えつつ、確実な回避手段（輝度アップキー）を本文に書く。パネルはこの間も操作可能。",
+    st:{intent:true, phase:"dimmed",
+        error:{title:"Couldn’t restore brightness", body:"Press the brightness-up key on your keyboard. Shade will keep trying in the background."},
+        errorAction:{label:"Try Again", act:"restore"}} },
+
+  { id:"err-shortcut", t:"Error · shortcut unavailable",
+    s:"Shade refuses to dim without a working escape hatch.",
+    ja:"ショートカットを他アプリが専有している場合。<b>復帰手段が無い状態では暗転させない</b>という安全側の挙動を、その理由ごと表示する。",
+    st:{error:{title:"⌃⌥⌘D is unavailable", body:"Another app owns this combination. Shade won’t dim without a working restore shortcut."},
+        errorAction:{label:"Set Shortcut…", act:"settings"}} }
+];
+
+(function buildGallery(){
+  const g = document.getElementById("gallery");
+  g.innerHTML = SCREENS.map((sc, i) =>
+      '<article class="frame">'
+    +   '<div class="frame-h"><span class="frame-n">' + String(i+1).padStart(2,"0") + '</span>'
+    +     '<span class="frame-t">' + esc(sc.t) + '</span></div>'
+    +   '<p class="frame-s">' + esc(sc.s) + '</p>'
+    +   '<div class="stage">' + renderPanel(sc.st) + '</div>'
+    +   '<button class="openbtn" data-open="' + sc.id + '">▶ Open in prototype</button>'
+    +   '<p class="frame-ja">' + sc.ja + '</p>'
+    + '</article>').join("");
+
+  // Static frames are pictures of UI: keep them out of the tab order.
+  g.querySelectorAll("[data-panel]").forEach(p => {
+    p.setAttribute("inert", "");
+    if (!("inert" in HTMLElement.prototype)){
+      p.style.pointerEvents = "none";
+      p.querySelectorAll("button,select,input,a").forEach(el => el.tabIndex = -1);
+    }
+  });
+
+  g.addEventListener("click", e => {
+    const b = e.target.closest("[data-open]");
+    if (!b) return;
+    const sc = SCREENS.find(x => x.id === b.dataset.open);
+    if (!sc) return;
+    loadPreset(sc);
+    document.getElementById("proto").scrollIntoView({behavior:"smooth", block:"start"});
+  });
+})();
+
+/* ─────────────────────────────────────────────────────────────
+   Live prototype
+   ───────────────────────────────────────────────────────────── */
+
+const P = Object.assign({}, DEFAULTS, {page:"tutorial"});
+let panelOpen = true, speed = 10, updateAvailable = false, injectRestoreError = false;
+const stage = document.getElementById("protoStage");
+const logEl = document.getElementById("log");
+const mbIcon = document.getElementById("mbIcon");
+const mbTip = document.getElementById("mbTip");
+let simClock = 0;
+
+function log(msg, cls){
+  const li = document.createElement("li");
+  const t = document.createElement("span");
+  t.textContent = fmt(simClock);
+  const b = document.createElement("em");
+  b.style.fontStyle = "normal";
+  b.textContent = msg;
+  li.appendChild(t); li.appendChild(b);
+  if (cls) li.className = cls;
+  logEl.prepend(li);
+  while (logEl.children.length > 60) logEl.lastChild.remove();
+}
+
+function loadPreset(sc){
+  Object.assign(P, DEFAULTS, sc.st);
+  panelOpen = true;
+  injectRestoreError = false;
+  syncPowerButtons();
+  render();
+  log("Loaded preset: " + sc.t, "hi");
+}
+
+function syncPowerButtons(){
+  document.getElementById("pwAC").setAttribute("aria-pressed", String(P.power === "ac"));
+  document.getElementById("pwBat").setAttribute("aria-pressed", String(P.power === "battery"));
+}
+
+function render(){
+  const d = derive(P);
+  stage.innerHTML = panelOpen
+    ? renderPanel(P)
+    : '<div class="closed">Panel closed.<br>Click the ◐ icon in the simulated menu bar to open it.</div>';
+
+  mbIcon.classList.toggle("off", !d.active);
+  mbTip.textContent = "Tooltip: Shade · " + (
+      d.active  ? "Keeping Mac awake"
+    : d.paused  ? "Paused, waiting for power"
+    : d.blocked ? "Needs a power adapter"
+    :             "Off");
+
+  const dis = document.getElementById("simBright");
+  dis.disabled = !d.dimmed;
+  document.getElementById("simHotkey").disabled = !(d.active);
+}
+
+/* ── transitions ─────────────────────────────────────────── */
+function turnOn(){
+  const d = derive(P);
+  if (!d.canRun){ blockedNudge(); return; }
+  P.intent = true; P.phase = "armed"; P.remaining = P.delay; P.error = null; P.errorAction = null;
+  log("Turn On → armed, " + delayLabel(P.delay) + " countdown", "hi");
+  render();
+}
+function turnOff(){
+  const was = derive(P);
+  P.intent = false; P.phase = "armed"; P.remaining = P.delay; P.ignore = 0;
+  P.error = null; P.errorAction = null;
+  log(was.paused ? "Turn Off → automatic resume cancelled" : "Turn Off → brightness restored, assertions released");
+  render();
+}
+function toggleIntent(){ derive(P).active || derive(P).paused ? turnOff() : turnOn(); }
+
+function dimNow(){
+  if (!derive(P).armed) return;
+  P.phase = "dimmed";
+  P.ignore = 2;
+  log("Display dimmed");
+  render();
+}
+function restore(reason){
+  if (!derive(P).dimmed) return;
+  if (injectRestoreError){
+    P.error = {title:"Couldn’t restore brightness",
+               body:"Press the brightness-up key on your keyboard. Shade will keep trying in the background."};
+    P.errorAction = {label:"Try Again", act:"restore"};
+    injectRestoreError = false;
+    log("Restore failed — recoverable error shown", "bad");
+    render();
+    return;
+  }
+  P.error = null; P.errorAction = null;
+  P.phase = "armed"; P.remaining = P.delay; P.ignore = 0;
+  log("Restored (" + reason + ") → fresh " + delayLabel(P.delay) + " countdown");
+  render();
+}
+function rearm(reason){
+  if (!derive(P).armed) return;
+  P.remaining = P.delay;
+  log("Countdown restarted (" + reason + ")");
+  render();
+}
+function blockedNudge(){
+  P.page = "main";
+  panelOpen = true;
+  log("Blocked: Only on power adapter is on and the Mac is on battery", "bad");
+  render();
+}
+function setPower(src){
+  if (P.power === src) return;
+  const before = derive(P);
+  P.power = src;
+  const after = derive(P);
+  syncPowerButtons();
+  if (src === "battery"){
+    if (before.active && !after.active){
+      P.phase = "armed"; P.remaining = P.delay; P.ignore = 0;
+      log("Adapter unplugged → brightness restored, PAUSED awaiting power", "bad");
+    } else if (before.active){
+      log("Adapter unplugged → still running (Only on power adapter is off)");
+    } else {
+      log("Adapter unplugged → Shade unavailable on battery");
+    }
+  } else {
+    if (before.paused){
+      P.phase = "armed"; P.remaining = P.delay;
+      log("Adapter reconnected → resumed with a fresh " + delayLabel(P.delay) + " countdown", "hi");
+    } else {
+      log("Adapter reconnected");
+    }
+  }
+  render();
+}
+function setAdapterOnly(v){
+  const before = derive(P);
+  P.adapterOnly = v;
+  const after = derive(P);
+  if (!v && before.paused && after.active){
+    P.phase = "armed"; P.remaining = P.delay;
+    log("Only on power adapter off → resumed on battery", "hi");
+  } else if (v && before.active && !after.active){
+    P.phase = "armed"; P.remaining = P.delay; P.ignore = 0;
+    log("Only on power adapter on → paused, awaiting power", "bad");
+  } else {
+    log("Only on power adapter: " + (v ? "on" : "off"));
+  }
+  render();
+}
+function allowOnBattery(){
+  P.adapterOnly = false;
+  P.error = null; P.errorAction = null;
+  log("Allow on Battery → Only on power adapter turned off", "hi");
+  if (!P.intent) turnOn(); else { P.phase = "armed"; P.remaining = P.delay; render(); }
+}
+
+/* ── shortcut recorder ───────────────────────────────────── */
+let recHandler = null;
+function beginRecording(){
+  endRecording();
+  P.recording = true; P.recErr = null;
+  render();
+  recHandler = e => {
+    e.preventDefault();
+    if (e.key === "Escape"){ log("Recording cancelled"); endRecording(); render(); return; }
+    if (["Meta","Control","Alt","Shift"].includes(e.key)) return;
+    if (!e.metaKey && !e.ctrlKey && !e.altKey){
+      P.recErr = "Add ⌘, ⌃, or ⌥ to the combination.";
+      log("Rejected: no modifier", "bad");
+      render();
+      return;
+    }
+    const label = (e.ctrlKey ? "⌃" : "") + (e.altKey ? "⌥" : "") + (e.shiftKey ? "⇧" : "")
+                + (e.metaKey ? "⌘" : "")
+                + (e.key === " " ? "Space" : e.key.length === 1 ? e.key.toUpperCase() : e.key);
+    // Simulated conflict: Q and Space stand in for combinations another app owns.
+    if (e.key.toUpperCase() === "Q" || e.key === " "){
+      P.recErr = label + " is already used by another app. Try another combination.";
+      log("Conflict: " + label, "bad");
+      render();
+      return;
+    }
+    P.shortcut = label;
+    log("Shortcut set to " + label, "hi");
+    endRecording();
+    render();
+  };
+  window.addEventListener("keydown", recHandler, true);
+  log("Recording shortcut… (Esc cancels)");
+}
+function endRecording(){
+  if (recHandler) window.removeEventListener("keydown", recHandler, true);
+  recHandler = null;
+  P.recording = false; P.recErr = null;
+}
+
+/* ── update check (simulated, no network) ────────────────── */
+function checkUpdates(){
+  log("Check for Updates… (simulated — no network request)");
+  stage.insertAdjacentHTML("beforeend", updateDialog("checking"));
+  setTimeout(() => {
+    const d = stage.querySelector("[data-dialog]");
+    if (d) d.outerHTML = updateDialog(updateAvailable ? "available" : "current");
+    log(updateAvailable ? "Sparkle: Shade 1.1 is available" : "Sparkle: up to date");
+  }, 1100);
+}
+function updateDialog(kind){
+  const head = '<div class="alert" data-dialog style="width:320px;margin-top:16px">'
+    + '<div class="ico">' + ICON_SHADE + '</div><div style="flex:1">';
+  if (kind === "checking")
+    return head + '<b>Checking for updates…</b><p>Contacting the Shade release feed.</p>'
+      + '<div class="bar"><i></i></div><div class="btns"><button class="abtn" data-act="closeDialog">Cancel</button></div></div></div>';
+  if (kind === "current")
+    return head + '<b>You’re up to date</b><p>Shade ' + VERSION + ' is the newest version available.</p>'
+      + '<div class="btns"><button class="abtn def" data-act="closeDialog">OK</button></div></div></div>';
+  return head + '<b>Shade 1.1 is available</b><p>You have ' + VERSION + '. Would you like to download it now?</p>'
+    + '<div class="btns"><button class="abtn" data-act="closeDialog">Remind Me Later</button>'
+    + '<button class="abtn def" data-act="closeDialog">Install Update</button></div></div></div>';
+}
+
+/* ── panel event delegation ──────────────────────────────── */
+stage.addEventListener("click", e => {
+  const el = e.target.closest("[data-act]");
+  if (!el || el.disabled) return;
+  const act = el.dataset.act;
+  if (act !== "record" && P.recording && act !== "cancelRec") { endRecording(); }
+  switch (act){
+    case "toggle":        toggleIntent(); break;
+    case "blockedNudge":  blockedNudge(); break;
+    case "turnOn":        turnOn(); break;
+    case "turnOff":       turnOff(); break;
+    case "dim":           dimNow(); break;
+    case "restore":       restore("panel button"); break;
+    case "allowBattery":  allowOnBattery(); break;
+    case "settings":      P.page = "settings"; render(); break;
+    case "back":          P.page = "main"; render(); break;
+    case "tutorial":      P.page = "tutorial"; render(); break;
+    case "startUsing":    P.page = "main"; log("Tutorial dismissed" + (P.hideTutorial ? " (won’t show on startup)" : "")); render(); break;
+    case "quit":          panelOpen = false; turnOff(); log("Quit → brightness restored, assertions released"); render(); break;
+    case "record":        beginRecording(); break;
+    case "cancelRec":     endRecording(); log("Recording cancelled"); render(); break;
+    case "wake":          P.wakeOnTouch = !P.wakeOnTouch; log("Wake on touch: " + (P.wakeOnTouch ? "on" : "off")); render(); break;
+    case "adapterOnly":   setAdapterOnly(!P.adapterOnly); break;
+    case "login":         P.login = !P.login; log("Launch at login: " + (P.login ? "on" : "off")); render(); break;
+    case "checkUpdates":  checkUpdates(); break;
+    case "closeDialog":   { const d = stage.querySelector("[data-dialog]"); if (d) d.remove(); break; }
+  }
+});
+stage.addEventListener("change", e => {
+  const el = e.target.closest("[data-act]");
+  if (!el) return;
+  if (el.dataset.act === "delay"){
+    P.delay = Number(el.value);
+    if (derive(P).armed) P.remaining = Math.min(P.remaining, P.delay);
+    log("Dim after: " + delayLabel(P.delay));
+    render();
+  }
+  if (el.dataset.act === "hideTutorial") P.hideTutorial = el.checked;
+});
+
+/* ── simulated menu bar icon ─────────────────────────────── */
+let clickTimer = null;
+mbIcon.addEventListener("click", e => {
+  if (e.detail > 1) return;              // handled by dblclick
+  clearTimeout(clickTimer);
+  clickTimer = setTimeout(() => {
+    panelOpen = !panelOpen;
+    log("Icon click → panel " + (panelOpen ? "opened" : "closed"));
+    render();
+  }, 260);                                // system double-click interval
+});
+mbIcon.addEventListener("dblclick", () => {
+  clearTimeout(clickTimer);
+  log("Icon double-click → toggle");
+  toggleIntent();
+});
+mbIcon.addEventListener("contextmenu", e => {
+  e.preventDefault();
+  clearTimeout(clickTimer);
+  log("Icon right-click → toggle");
+  toggleIntent();
+});
+
+/* ── simulator controls ──────────────────────────────────── */
+const on = (id, fn) => document.getElementById(id).addEventListener("click", fn);
+on("pwAC",  () => setPower("ac"));
+on("pwBat", () => setPower("battery"));
+on("sp1",   () => setSpeed(1));
+on("sp10",  () => setSpeed(10));
+function setSpeed(v){
+  speed = v;
+  document.getElementById("sp1").setAttribute("aria-pressed", String(v === 1));
+  document.getElementById("sp10").setAttribute("aria-pressed", String(v === 10));
+}
+on("simInput", () => {
+  const d = derive(P);
+  if (d.armed) rearm("hardware input");
+  else if (d.dimmed){
+    if (!P.wakeOnTouch) log("Input while dimmed — ignored (Wake on touch is off)");
+    else if (P.ignore > 0) { /* Consume the dimming gesture silently. */ }
+    else restore("wake on touch");
+  } else log("Input while Shade is not running — no effect");
+});
+on("simBright", () => { if (derive(P).dimmed) restore("brightness-up key"); });
+on("simHotkey", () => {
+  const d = derive(P);
+  if (d.dimmed) restore("global shortcut");
+  else if (d.armed) rearm("global shortcut");
+});
+on("upNone", () => { updateAvailable = false; document.getElementById("upNone").setAttribute("aria-pressed","true"); document.getElementById("upNew").setAttribute("aria-pressed","false"); });
+on("upNew",  () => { updateAvailable = true;  document.getElementById("upNone").setAttribute("aria-pressed","false"); document.getElementById("upNew").setAttribute("aria-pressed","true"); });
+on("simErr", () => { injectRestoreError = true; log("Next restore attempt will fail", "bad"); });
+on("simReset", () => {
+  Object.assign(P, DEFAULTS, {page:"main"});
+  panelOpen = true; injectRestoreError = false; endRecording();
+  syncPowerButtons(); render();
+  log("Reset", "hi");
+});
+
+/* ── clock ───────────────────────────────────────────────── */
+setInterval(() => {
+  const dt = 0.25 * speed;
+  simClock += dt;
+  const d = derive(P);
+  let dirty = false;
+  if (d.armed){
+    P.remaining = Math.max(0, P.remaining - dt);
+    dirty = true;
+    if (P.remaining <= 0){ log("Countdown reached zero"); dimNow(); return; }
+  }
+  if (d.dimmed && P.ignore > 0){
+    P.ignore = Math.max(0, P.ignore - dt);
+    dirty = true;
+
+  }
+  if (dirty) render();
+}, 250);
+
+/* boot */
+setSpeed(10);
+syncPowerButtons();
+render();
+log("Prototype ready — nothing here touches your display, power, or the network", "hi");
+</script>
+</body>
+</html>

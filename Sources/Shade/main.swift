@@ -41,10 +41,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         item.button?.target = self; item.button?.action = #selector(handleIconClick)
         item.button?.sendAction(on: [.leftMouseUp, .rightMouseUp])
         item.button?.toolTip = "Shade · Off"
-        model.$session.sink { [weak self] session in
-            self?.item.button?.appearsDisabled = !session.isOn
-            self?.item.button?.toolTip = session.isOn ? "Shade · Keeping Mac awake" : "Shade · Off"
-        }.store(in: &subscriptions)
+        model.$session.combineLatest(model.$waitingForPower, model.$adapterConnected, model.$onlyOnPowerAdapter)
+            .sink { [weak self] session, waiting, connected, adapterOnly in
+                self?.item.button?.appearsDisabled = !session.isOn
+                let status = session.isOn ? "Keeping Mac awake" : waiting ? "Paused, waiting for power" : adapterOnly && !connected ? "Needs a power adapter" : "Off"
+                self?.item.button?.toolTip = "Shade · " + status
+            }.store(in: &subscriptions)
         if !model.demo, Bundle.main.object(forInfoDictionaryKey: "SUPublicEDKey") != nil {
             updater = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil)
         }
@@ -64,6 +66,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         if event.type == .rightMouseUp || event.clickCount == 2 {
             hidePanel()
             model.toggle()
+            if model.enableControlDisabled { togglePanel() }
             return
         }
         guard event.clickCount <= 1 else { return }
@@ -101,7 +104,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         if outsideMonitor == nil {
             outsideMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in self?.hidePanel() }
             escapeMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
-                if event.keyCode == 53, self?.panelWindow?.isVisible == true {
+                if event.keyCode == 53, self?.panelWindow?.isVisible == true, self?.model.recording != true {
                     self?.hidePanel(); return nil
                 }
                 return event

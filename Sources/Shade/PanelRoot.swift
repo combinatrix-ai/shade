@@ -27,7 +27,7 @@ struct PanelRoot: View {
                         Text("Shade").fontWeight(.semibold)
                     }.font(.system(size: 17)).padding(.bottom, 26)
                     Text("A dark display.\nA working Mac.").font(.system(size: 25, weight: .semibold)).tracking(-0.7)
-                    Text("Keep Computer Use running while your built-in display is dimmed.")
+                    Text("Keep Computer Use running with your display dimmed.")
                         .font(.system(size: 13)).foregroundStyle(.secondary).lineSpacing(4).padding(.top, 14).padding(.bottom, 24)
                     Divider()
                     HStack(spacing: 12) {
@@ -39,12 +39,12 @@ struct PanelRoot: View {
                         }.font(.system(size: 11))
                     }.padding(.vertical, 20)
                     Toggle("Don’t show on startup", isOn: $hideTutorial).toggleStyle(.checkbox).font(.system(size: 12))
-                    Button("Got it — Start using Shade") {
+                    Button("Start using Shade") {
                         if !model.demo {
                             UserDefaults.standard.set(hideTutorial, forKey: "hideTutorial")
                         }
                         page = .main
-                    }.buttonStyle(.borderedProminent).controlSize(.large).frame(maxWidth: .infinity).padding(.top, 14)
+                    }.buttonStyle(ShadeActionStyle()).padding(.top, 14)
                     Text("Dimming doesn’t lock your Mac.\nShade is a privacy band-aid, not security.")
                         .font(.system(size: 11)).foregroundStyle(Color(red: 0.69, green: 0.27, blue: 0.24)).lineSpacing(4).padding(.top, 22)
                 }.padding(22).frame(width: 320)

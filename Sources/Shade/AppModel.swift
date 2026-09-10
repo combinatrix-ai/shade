@@ -91,10 +91,36 @@ final class AppModel: ObservableObject {
 
     var title: String {
         switch session.phase {
-        case .off: return waitingForPower ? "Waiting for power adapter" : (blockedByPower ? "Connect power adapter" : "Ready to dim")
+        case .off: return waitingForPower ? "Waiting for power adapter" : (blockedByPower ? "Needs a power adapter" : "Ready to dim")
         case .pending: let t = session.remaining(now: now); return String(format: "Dimming in %d:%02d", t / 60, t % 60)
         case .dark: return "Display dimmed"
         }
+    }
+
+    var delayLabel: String { delay == 30 ? "30 sec" : "\(Int(delay / 60)) min" }
+
+    var needsBrightnessRecovery: Bool { snapshot != nil && error != nil }
+
+    func retryRestore() {
+        if restore() { error = nil }
+    }
+
+    func allowOnBattery() {
+        onlyOnPowerAdapter = false
+        if !isOn { enable() }
+    }
+
+    func captureShortcut(_ candidate: Shortcut) -> String? {
+        if !demo {
+            if isDark, !restore() { return "Restore the display before changing the shortcut." }
+            if keyboard.configure(shortcut: candidate) != nil {
+                keyboardIssue = keyboard.configure(shortcut: shortcut)
+                if keyboardIssue != nil { disable() }
+                return candidate.label + " is unavailable. Try another shortcut."
+            }
+        }
+        shortcut = candidate
+        return keyboardIssue
     }
 
     var actionLabel: String {
@@ -135,7 +161,7 @@ final class AppModel: ObservableObject {
         if snapshot != nil, !restore() { return }
         error = nil
         guard powerPermitsSession else {
-            error = "Connect a power adapter or turn off Only on power adapter in Settings."
+            enforcePowerPolicy()
             return
         }
         configureKeyboard()
