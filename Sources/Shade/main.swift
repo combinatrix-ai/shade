@@ -10,12 +10,13 @@ if CommandLine.arguments.contains("--restore-guard") {
 }
 
 final class MenuPanel: NSPanel {
+    var cancel: (() -> Void)?
     override var canBecomeKey: Bool {
         true
     }
 
     override func cancelOperation(_ sender: Any?) {
-        orderOut(sender)
+        cancel?()
     }
 }
 
@@ -85,6 +86,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         }
         if panelWindow == nil {
             let panel = MenuPanel(contentViewController: NSHostingController(rootView: PanelRoot(model: model, checkUpdates: { [weak self] in self?.updater?.checkForUpdates(nil) })))
+            panel.cancel = { [weak self] in self?.cancelPanel() }
             panel.title = "Shade"
             panel.styleMask = [.titled, .fullSizeContentView]
             panel.titleVisibility = .hidden
@@ -96,16 +98,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             panel.level = .floating
             panelWindow = panel
         }
-        if let panel = panelWindow, let screen = item.button?.window?.screen ?? NSScreen.main {
-            let bounds = screen.visibleFrame
-            let iconX = item.button?.window?.frame.midX ?? bounds.maxX - 200
-            panel.setFrameOrigin(NSPoint(x: min(max(iconX - panel.frame.width / 2, bounds.minX + 12), bounds.maxX - panel.frame.width - 12), y: bounds.maxY - panel.frame.height - 8))
-        }
+        positionPanel()
         if outsideMonitor == nil {
             outsideMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in self?.hidePanel() }
             escapeMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
                 if event.keyCode == 53, self?.panelWindow?.isVisible == true, self?.model.recording != true {
-                    self?.hidePanel(); return nil
+                    self?.cancelPanel()
+                    return nil
                 }
                 return event
             }
@@ -114,7 +113,28 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         NSApp.activate(ignoringOtherApps: true)
     }
 
+    private func positionPanel() {
+        guard let panel = panelWindow, let screen = item.button?.window?.screen ?? NSScreen.main else { return }
+        let bounds = screen.visibleFrame
+        let iconX = item.button?.window?.frame.midX ?? bounds.maxX - 200
+        panel.setFrameOrigin(NSPoint(x: min(max(iconX - panel.frame.width / 2, bounds.minX + 12), bounds.maxX - panel.frame.width - 12), y: bounds.maxY - panel.frame.height - 8))
+    }
+
+    func windowDidResize(_ notification: Notification) {
+        if notification.object as? NSWindow === panelWindow { positionPanel() }
+    }
+
+    private func cancelPanel() {
+        guard !model.recording else { return }
+        if model.editingDelay {
+            model.editingDelay = false
+        } else {
+            hidePanel()
+        }
+    }
+
     private func hidePanel() {
+        model.editingDelay = false
         panelWindow?.orderOut(nil)
         if let outsideMonitor {
             NSEvent.removeMonitor(outsideMonitor)

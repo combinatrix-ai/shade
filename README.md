@@ -18,11 +18,12 @@ We expect this kind of separation between an agent's working session and the phy
 
 - **Only on power adapter** defaults on. Unplugging restores brightness and pauses Shade, releasing its sleep-prevention assertions. Reconnecting resumes the session with a fresh dimming countdown. Turning Shade off while paused cancels automatic resume. Sleep, switching user sessions, or quitting also cancels it. Turn this setting off to use Shade on battery.
 - Starts off. Double-click or right-click the menu bar icon to toggle wake prevention. A single click opens the panel after the system double-click interval.
-- After 1 minute without hardware input (configurable: 30 seconds, 1, 3, or 5 minutes), sets the built-in display's brightness to zero. Physical keyboard and pointer activity postpone dimming while the display is visible.
+- After 1 minute without hardware input (configurable: 1–60 minutes, in whole minutes), sets the built-in display's brightness to zero. Physical keyboard and pointer activity postpone dimming while the display is visible.
+- Click **Dimming in m:ss** to choose a delay using the slider, minute field, or presets. **Set timer** restarts the countdown from that moment and saves the delay for future sessions; **Cancel** or Escape discards the edit. The same control is available under **Settings → Dim after**.
 - Press **Control + Option + Command + D** to restore the saved brightness. Keeping the Mac awake continues.
 - Restoring the display automatically starts a fresh dimming countdown. The shortcut restarts that countdown while visible. The brightness-up key also returns to automatic dimming, preserving the brightness you chose. With **Wake on touch** enabled, physical trackpad movement, mouse activity, or typing restores the display and starts a fresh countdown. It defaults off; resting a finger without generating input is not detected.
 - Click the shortcut field and press a new combination with Command, Control, or Option to replace it. Escape cancels recording.
-- The menu panel closes on an outside click, app switch, or Escape.
+- The menu panel closes on an outside click or app switch. Escape cancels an open timer edit first; otherwise it closes the panel.
 - Turning off or quitting restores the brightness and releases this app's wake assertions. Sessions end after a maximum of 8 hours. Manual sleep or switching away from the user session ends the session.
 - Screen-lock preferences are never changed. An already locked Mac is not unlocked.
 

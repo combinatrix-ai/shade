@@ -1,5 +1,6 @@
 import AppKit
 import SwiftUI
+import ShadeCore
 
 private enum ShadeStyle {
     static let green = Color(red: 0.28, green: 0.41, blue: 0.34)
@@ -23,6 +24,7 @@ struct PanelView: View {
     @ObservedObject var model: AppModel
     let settings: () -> Void
     let quit: () -> Void
+    @State private var hoveringDelay = false
 
     private var status: String {
         model.isOn ? "Keeping Mac awake" : model.waitingForPower ? "Paused" : model.blockedByPower ? "On battery" : ""
@@ -50,8 +52,31 @@ struct PanelView: View {
                     .background(model.isOn ? ShadeStyle.green : stateColor.opacity(0.09), in: RoundedRectangle(cornerRadius: 4))
                 Text(status).font(.system(size: 11)).foregroundStyle(stateColor)
             }.padding(.top, 18)
-            Text(model.title).font(.system(size: 21, weight: .semibold)).tracking(-0.6)
-                .fixedSize(horizontal: false, vertical: true).padding(.top, 14)
+            if model.isOn && !model.isDark {
+                Button { model.editingDelay.toggle() } label: {
+                    HStack {
+                        Text(model.title).monospacedDigit()
+                        Spacer(minLength: 4)
+                        Image(systemName: "chevron.down")
+                            .font(.system(size: 12, weight: .medium)).foregroundStyle(.secondary)
+                            .rotationEffect(.degrees(model.editingDelay ? 180 : 0))
+                    }.font(.system(size: 21, weight: .semibold)).tracking(-0.6)
+                        .padding(.horizontal, 7).padding(.vertical, 5)
+                        .background(ShadeStyle.green.opacity(hoveringDelay || model.editingDelay ? 0.09 : 0), in: RoundedRectangle(cornerRadius: 7))
+                        .contentShape(Rectangle())
+                }.buttonStyle(.plain).padding(.horizontal, -7).padding(.top, 9).padding(.bottom, -5)
+                    .onHover { hoveringDelay = $0 }
+                    .help("Change dimming delay")
+                    .accessibilityLabel(model.title + ", change dimming delay")
+                    .accessibilityValue(model.editingDelay ? "Expanded" : "Collapsed")
+                if model.editingDelay {
+                    DimmingDelayEditor(minutes: Int(model.delay / 60), apply: model.setDelay, cancel: { model.editingDelay = false })
+                        .padding(.top, 14)
+                }
+            } else {
+                Text(model.title).font(.system(size: 21, weight: .semibold)).tracking(-0.6)
+                    .fixedSize(horizontal: false, vertical: true).padding(.top, 14)
+            }
             if !model.isOn && !model.waitingForPower && !model.blockedByPower {
                 Text("Auto-dim after " + model.delayLabel).font(.system(size: 11)).foregroundStyle(.secondary).padding(.top, 8)
             }
@@ -97,6 +122,10 @@ struct PanelView: View {
                 Button("Quit", action: quit)
             }.buttonStyle(.plain).font(.system(size: 12)).padding(.top, 12)
         }.padding(22).frame(width: 320)
+            .onChange(of: model.isOn && !model.isDark) { _, pending in
+                if !pending { model.editingDelay = false }
+            }
+            .onDisappear { model.editingDelay = false }
     }
 
     private func notice<Content: View>(color: Color, @ViewBuilder content: () -> Content) -> some View {
@@ -125,9 +154,17 @@ struct SettingsView: View {
             }.padding(.bottom, 16)
             VStack(alignment: .leading, spacing: 0) {
                 row("Dim after") {
-                    Picker("Dim after", selection: $model.delay) {
-                        Text("30 sec").tag(30.0); Text("1 min").tag(60.0); Text("3 min").tag(180.0); Text("5 min").tag(300.0)
-                    }.labelsHidden().frame(width: 90)
+                    Button { model.editingDelay.toggle() } label: {
+                        HStack(spacing: 6) {
+                            Text(model.delayLabel).monospacedDigit()
+                            Image(systemName: "chevron.down").font(.system(size: 9))
+                                .rotationEffect(.degrees(model.editingDelay ? 180 : 0))
+                        }
+                    }.accessibilityLabel("Change dimming delay")
+                }
+                if model.editingDelay {
+                    DimmingDelayEditor(minutes: Int(model.delay / 60), apply: model.setDelay, cancel: { model.editingDelay = false })
+                        .padding(.bottom, 12)
                 }
                 Divider()
                 row("Shortcut") {
@@ -175,7 +212,7 @@ struct SettingsView: View {
             Text("Version " + (Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "—"))
                 .font(.system(size: 10)).foregroundStyle(.secondary).padding(.top, 10)
         }.font(.system(size: 13)).padding(22).frame(width: 320)
-            .onDisappear { endRecording() }
+            .onDisappear { endRecording(); model.editingDelay = false }
     }
 
     private func row<Content: View>(_ title: String, detail: String? = nil, badge: String? = nil, @ViewBuilder content: () -> Content) -> some View {
@@ -211,5 +248,87 @@ struct SettingsView: View {
     private func endRecording() {
         if let monitor { NSEvent.removeMonitor(monitor) }
         monitor = nil; model.recording = false; recordingError = nil
+    }
+}
+
+
+private struct DimmingDelayEditor: View {
+    let apply: (Int) -> Void
+    let cancel: () -> Void
+    @State private var text: String
+    @State private var sliderMinutes: Double
+    @FocusState private var inputFocused: Bool
+    private let presets = [1, 5, 15, 30, 60]
+
+    init(minutes: Int, apply: @escaping (Int) -> Void, cancel: @escaping () -> Void) {
+        self.apply = apply
+        self.cancel = cancel
+        _text = State(initialValue: String(minutes))
+        _sliderMinutes = State(initialValue: Double(minutes))
+    }
+
+    private var validMinutes: Int? {
+        guard let value = Int(text), DimmingDelay.minutes.contains(value) else { return nil }
+        return value
+    }
+
+    private func select(_ minutes: Int) {
+        text = String(minutes)
+        sliderMinutes = Double(minutes)
+    }
+
+    private func submit() {
+        if let minutes = validMinutes { apply(minutes) }
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack {
+                Text("Dim after").font(.system(size: 11)).foregroundStyle(.secondary)
+                Spacer()
+                TextField("Minutes", text: $text)
+                    .textFieldStyle(.roundedBorder).multilineTextAlignment(.trailing)
+                    .font(.system(size: 16, weight: .semibold)).monospacedDigit()
+                    .foregroundStyle(ShadeStyle.green).frame(width: 56)
+                    .focused($inputFocused).accessibilityLabel("Dimming delay in minutes")
+                    .onSubmit(submit)
+                    .onChange(of: text) { _, _ in
+                        if let value = validMinutes { sliderMinutes = Double(value) }
+                    }
+                Text("min").font(.system(size: 11))
+            }
+            Slider(value: Binding(get: { sliderMinutes }, set: { select(Int($0)) }), in: 1...60, step: 1)
+                .tint(ShadeStyle.green).padding(.top, 14)
+                .accessibilityLabel("Dimming delay").accessibilityValue("\(Int(sliderMinutes)) minutes")
+            HStack {
+                Text("1 min")
+                Spacer()
+                Text("60 min")
+            }.font(.system(size: 10)).foregroundStyle(.secondary)
+            HStack(spacing: 5) {
+                ForEach(presets, id: \.self) { minutes in
+                    Button { select(minutes) } label: {
+                        Text("\(minutes)m").font(.system(size: 11))
+                            .frame(maxWidth: .infinity).padding(.vertical, 5)
+                            .foregroundStyle(validMinutes == minutes ? ShadeStyle.green : Color.secondary)
+                            .background(ShadeStyle.green.opacity(validMinutes == minutes ? 0.13 : 0.04), in: RoundedRectangle(cornerRadius: 5))
+                            .overlay(RoundedRectangle(cornerRadius: 5).strokeBorder(ShadeStyle.green.opacity(validMinutes == minutes ? 0.35 : 0.13)))
+                    }.buttonStyle(.plain).accessibilityLabel("\(minutes) minutes")
+                        .accessibilityAddTraits(validMinutes == minutes ? .isSelected : [])
+                }
+            }.padding(.top, 12)
+            if validMinutes == nil {
+                Text("Enter a whole number from 1 to 60.")
+                    .font(.system(size: 10)).foregroundStyle(ShadeStyle.red).padding(.top, 10)
+            }
+            HStack(spacing: 8) {
+                Button("Cancel", action: cancel).buttonStyle(ShadeActionStyle(neutral: true)).frame(width: 70)
+                Button("Set timer", action: submit).buttonStyle(ShadeActionStyle()).disabled(validMinutes == nil)
+            }.font(.system(size: 11)).padding(.top, 14)
+        }.padding(14)
+            .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: 9))
+            .overlay(RoundedRectangle(cornerRadius: 9).strokeBorder(ShadeStyle.green.opacity(0.18)))
+            .onAppear { inputFocused = true }
+            .onExitCommand(perform: cancel)
     }
 }

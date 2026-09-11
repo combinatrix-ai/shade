@@ -40,3 +40,13 @@ The user's physical both-Shift hold and custom shortcut activation have not yet 
 - Activity preceding Dim Now is consumed before dimming, so that action does not cause an immediate wake.
 - Four core tests pass, including opt-in/off behavior, no-activity behavior, and rearming. The release build and 20 restore-guard cycles pass.
 - Native UI confirmed default off, toggling on, and reaching Display dimmed with the setting enabled. After requesting physical trackpad movement, native UI changed from Display dimmed to Dimming in 1:00 without an agent restore action. Visual confirmation from the user was pending at this checkpoint.
+
+
+## Quick dimming timer (2026-09-11)
+
+- Final validation: 15 Swift tests passed; release build and code-signature verification passed; 20 restore-guard disarm/exit cycles passed without display changes.
+
+- The countdown headline opens an inline minute field, 1–60 slider, and 1/5/15/30/60-minute presets. Set timer saves the whole-minute delay and restarts a pending countdown even when the chosen duration is unchanged. Cancel/Escape dismisses the editor without calling the setting update. Settings uses the same editor.
+- The requested helper sentence is absent from the app and accepted timer mock. The older full-state mock links to the accepted timer interaction.
+- App-model tests use a unique UserDefaults suite and demo setup: confirmed values persist and reload, invalid values leave the timer untouched, same-duration confirmation restarts the countdown, and changes while off/dark do not enable or restore the display. Core tests cover all 60 stored values, invalid stored settings, and the new countdown deadline.
+- Native UI inspection was attempted with a dedicated temporary demo bundle; the Computer Use service timed out. Visual layout, native clicks, and physical Escape delivery remain unverified. No display dimming or installed-app replacement was performed for this change.

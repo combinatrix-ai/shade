@@ -8,10 +8,10 @@ final class AppModel: ObservableObject {
     @Published var now = Date()
     @Published var error: String?
     @Published var keyboardIssue: String?
-    @Published var delay: Double {
+    @Published private(set) var delay: Double {
         didSet {
             if !demo {
-                UserDefaults.standard.set(delay, forKey: "delay")
+                defaults.set(delay, forKey: "delay")
             }; reserveIfPending()
         }
     }
@@ -19,7 +19,7 @@ final class AppModel: ObservableObject {
     @Published var shortcut: Shortcut {
         didSet {
             if !demo {
-                UserDefaults.standard.set(try? JSONEncoder().encode(shortcut), forKey: "hotkey")
+                defaults.set(try? JSONEncoder().encode(shortcut), forKey: "hotkey")
             }
             configureKeyboard()
         }
@@ -28,7 +28,7 @@ final class AppModel: ObservableObject {
     @Published var wakeOnTouch: Bool {
         didSet {
             if !demo {
-                UserDefaults.standard.set(wakeOnTouch, forKey: "wakeOnTouch")
+                defaults.set(wakeOnTouch, forKey: "wakeOnTouch")
             }
         }
     }
@@ -36,7 +36,7 @@ final class AppModel: ObservableObject {
     @Published var onlyOnPowerAdapter: Bool {
         didSet {
             if !demo {
-                UserDefaults.standard.set(onlyOnPowerAdapter, forKey: "onlyOnPowerAdapter")
+                defaults.set(onlyOnPowerAdapter, forKey: "onlyOnPowerAdapter")
                 enforcePowerPolicy()
             }
         }
@@ -44,8 +44,10 @@ final class AppModel: ObservableObject {
 
     @Published private(set) var adapterConnected = true
     @Published private(set) var waitingForPower = false
+    @Published var editingDelay = false
     @Published var recording = false
     @Published var loginEnabled = false
+    private let defaults: UserDefaults
     private let awake = AwakeHold()
     private let activity = PhysicalActivity()
     private let keyboard = KeyboardListener()
@@ -57,13 +59,14 @@ final class AppModel: ObservableObject {
     private var enabledAt: Date?
     var demo: Bool
 
-    init(demo: Bool = false) {
+    init(demo: Bool = false, defaults: UserDefaults = .standard) {
         self.demo = demo
-        onlyOnPowerAdapter = UserDefaults.standard.object(forKey: "onlyOnPowerAdapter") as? Bool ?? true
-        wakeOnTouch = UserDefaults.standard.bool(forKey: "wakeOnTouch")
-        let savedDelay = UserDefaults.standard.double(forKey: "delay")
-        delay = [30.0, 60, 180, 300].contains(savedDelay) ? savedDelay : 60
-        shortcut = UserDefaults.standard.data(forKey: "hotkey").flatMap { try? JSONDecoder().decode(Shortcut.self, from: $0) } ?? .initial
+        self.defaults = defaults
+        onlyOnPowerAdapter = defaults.object(forKey: "onlyOnPowerAdapter") as? Bool ?? true
+        wakeOnTouch = defaults.bool(forKey: "wakeOnTouch")
+        let savedDelay = defaults.double(forKey: "delay")
+        delay = DimmingDelay.restoredSeconds(savedDelay)
+        shortcut = defaults.data(forKey: "hotkey").flatMap { try? JSONDecoder().decode(Shortcut.self, from: $0) } ?? .initial
         keyboard.action = { [weak self] in guard self?.recording == false else { return }; self?.shortcutAction() }
         adapterConnected = demo || PowerSupply.isOnAdapter()
         configureKeyboard()
@@ -97,7 +100,13 @@ final class AppModel: ObservableObject {
         }
     }
 
-    var delayLabel: String { delay == 30 ? "30 sec" : "\(Int(delay / 60)) min" }
+    var delayLabel: String { "\(Int(delay / 60)) min" }
+
+    func setDelay(minutes: Int) {
+        guard DimmingDelay.minutes.contains(minutes) else { return }
+        delay = Double(minutes * 60)
+        editingDelay = false
+    }
 
     var needsBrightnessRecovery: Bool { snapshot != nil && error != nil }
 

@@ -16,6 +16,22 @@ final class SessionTests: XCTestCase {
         XCTAssertEqual(s.remaining(now: now.addingTimeInterval(41)), 0)
     }
 
+    func testChangingDelayRestartsFromConfirmationTime() {
+        var s = Session()
+        s.enable(now: now, delay: 60)
+        let confirmation = now.addingTimeInterval(47)
+        s.reserve(now: confirmation, delay: 3600)
+        XCTAssertEqual(s.remaining(now: confirmation), 3600)
+        XCTAssertFalse(s.isDue(now: now.addingTimeInterval(60)))
+        XCTAssertTrue(s.isDue(now: confirmation.addingTimeInterval(3600)))
+
+        let shorter = confirmation.addingTimeInterval(100)
+        s.reserve(now: shorter, delay: 60)
+        XCTAssertEqual(s.remaining(now: shorter), 60)
+        XCTAssertFalse(s.isDue(now: shorter.addingTimeInterval(59)))
+        XCTAssertTrue(s.isDue(now: shorter.addingTimeInterval(60)))
+    }
+
     func testRestoreAutomaticallyRearmsFullDelay() {
         var s = Session()
         s.enable(now: now, delay: 60)
