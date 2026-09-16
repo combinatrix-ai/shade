@@ -25,6 +25,7 @@ We expect this kind of separation between an agent's working session and the phy
 - Click the shortcut field and press a new combination with Command, Control, or Option to replace it. Escape cancels recording.
 - The menu panel closes on an outside click or app switch. Escape cancels an open timer edit first; otherwise it closes the panel.
 - Turning off or quitting restores the brightness and releases this app's wake assertions. Sessions end after a maximum of 8 hours. Manual sleep or switching away from the user session ends the session.
+- The ON/OFF badge keeps its existing meaning. The adjacent auto-lock status shows a configured inactivity interval, current prevention, or a conservative fallback when macOS settings cannot be resolved. See [auto-lock status](docs/auto-lock.md).
 - Screen-lock preferences are never changed. An already locked Mac is not unlocked.
 
 ## Install and update

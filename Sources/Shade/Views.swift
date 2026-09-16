@@ -27,7 +27,7 @@ struct PanelView: View {
     @State private var hoveringDelay = false
 
     private var status: String {
-        model.isOn ? "Keeping Mac awake" : model.waitingForPower ? "Paused" : model.blockedByPower ? "On battery" : ""
+        model.autoLockStatus.label
     }
     private var stateColor: Color {
         model.waitingForPower || model.blockedByPower ? ShadeStyle.amber : model.isOn ? ShadeStyle.green : .secondary
@@ -51,7 +51,12 @@ struct PanelView: View {
                     .foregroundStyle(model.isOn ? .white : stateColor)
                     .background(model.isOn ? ShadeStyle.green : stateColor.opacity(0.09), in: RoundedRectangle(cornerRadius: 4))
                 Text(status).font(.system(size: 11)).foregroundStyle(stateColor)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .help("Based on inactivity settings, not a countdown. Manual locking is always available.")
             }.padding(.top, 18)
+            if let detail = model.autoLockDetail {
+                Text(detail).font(.system(size: 10)).foregroundStyle(.secondary).padding(.top, 4)
+            }
             if model.isOn && !model.isDark {
                 Button { model.editingDelay.toggle() } label: {
                     HStack {
@@ -122,6 +127,7 @@ struct PanelView: View {
                 Button("Quit", action: quit)
             }.buttonStyle(.plain).font(.system(size: 12)).padding(.top, 12)
         }.padding(22).frame(width: 320)
+            .onAppear { model.refreshAutoLock(force: true) }
             .onChange(of: model.isOn && !model.isDark) { _, pending in
                 if !pending { model.editingDelay = false }
             }

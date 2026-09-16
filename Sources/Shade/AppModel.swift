@@ -5,6 +5,12 @@ import ShadeCore
 
 final class AppModel: ObservableObject {
     @Published private(set) var session = Session()
+    @Published private(set) var autoLockSnapshot = AutoLockSnapshot()
+    private let lockQueue = DispatchQueue(label: "shade.auto-lock", qos: .utility)
+    private var lockReadGeneration = 0
+    private var nextLockRead = Date.distantPast
+    private var lockReadPending = false
+    private var shuttingDown = false
     @Published var now = Date()
     @Published var error: String?
     @Published var keyboardIssue: String?
@@ -70,6 +76,7 @@ final class AppModel: ObservableObject {
         keyboard.action = { [weak self] in guard self?.recording == false else { return }; self?.shortcutAction() }
         adapterConnected = demo || PowerSupply.isOnAdapter()
         configureKeyboard()
+        refreshAutoLock()
         loginEnabled = SMAppService.mainApp.status == .enabled
         timer = Timer.scheduledTimer(withTimeInterval: 0.25, repeats: true) { [weak self] _ in self?.tick() }
         let center = NSWorkspace.shared.notificationCenter
@@ -78,6 +85,36 @@ final class AppModel: ObservableObject {
         observers.append(NotificationCenter.default.addObserver(forName: NSApplication.didBecomeActiveNotification, object: nil, queue: .main) { [weak self] _ in
             guard let self, !self.recording, !self.isOn, keyboardIssue != nil else { return }; configureKeyboard()
         })
+    }
+
+    var autoLockStatus: AutoLockStatus {
+        demo ? (isOn ? .prevented : .after(600)) : autoLockSnapshot.status
+    }
+
+    var autoLockDetail: String? {
+        autoLockStatus == .prevented && !isOn ? "By another app" : nil
+    }
+
+    func refreshAutoLock(force: Bool = false) {
+        guard !demo, !shuttingDown else { return }
+        if force {
+            lockReadGeneration += 1
+            autoLockSnapshot = AutoLockSnapshot()
+            nextLockRead = .distantPast
+        }
+        guard !lockReadPending, Date() >= nextLockRead else { return }
+        lockReadPending = true
+        let generation = lockReadGeneration
+        lockQueue.async { [weak self] in
+            let snapshot = AutoLockMonitor.read()
+            DispatchQueue.main.async {
+                guard let self, !self.shuttingDown else { return }
+                self.lockReadPending = false
+                guard generation == self.lockReadGeneration else { self.refreshAutoLock(); return }
+                self.autoLockSnapshot = snapshot
+                self.nextLockRead = Date().addingTimeInterval(5)
+            }
+        }
     }
 
     var isOn: Bool {
@@ -154,7 +191,10 @@ final class AppModel: ObservableObject {
 
     private func enforcePowerPolicy() {
         let connected = demo || PowerSupply.isOnAdapter()
-        if adapterConnected != connected { adapterConnected = connected }
+        if adapterConnected != connected {
+            adapterConnected = connected
+            refreshAutoLock(force: true)
+        }
         if blockedByPower {
             if isOn {
                 disable()
@@ -187,6 +227,7 @@ final class AppModel: ObservableObject {
             now = Date()
             enabledAt = now
             session.enable(now: now, delay: delay)
+            refreshAutoLock(force: true)
         } catch { self.error = error.localizedDescription; awake.stop(); activity.stop() }
     }
 
@@ -196,6 +237,7 @@ final class AppModel: ObservableObject {
         // Keep the armed guardian/snapshot available for a recovery retry.
         _ = restore()
         awake.stop(); activity.stop(); enabledAt = nil; session.disable()
+        refreshAutoLock(force: true)
     }
 
     func primaryAction() {
@@ -292,6 +334,7 @@ final class AppModel: ObservableObject {
     private func tick() {
         now = Date()
         enforcePowerPolicy()
+        refreshAutoLock()
         if isOn, !demo, !keyboard.ready || !awake.isRunning || (isDark && restoreGuard?.isRunning != true) {
             error = "Shade stopped: shortcut or sleep prevention unavailable."
             disable()
@@ -328,6 +371,8 @@ final class AppModel: ObservableObject {
     }
 
     func shutdown() {
+        shuttingDown = true
+        timer?.invalidate(); timer = nil
         _ = restore(); restoreGuard?.finish(); restoreGuard = nil; awake.stop(); activity.stop(); keyboard.stop()
     }
 }

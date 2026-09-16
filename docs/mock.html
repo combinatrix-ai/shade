@@ -264,7 +264,7 @@ footer{margin-top:70px;padding-top:22px;border-top:1px solid var(--line);font-si
     </div>
     <div class="box">
       <h5>Activity — the ON/OFF pill + status line</h5>
-      <p>Green pill = assertions held, display managed. Amber outlined pill = intent kept, but Shade is not running. Grey pill = nothing held. The line beside it says the reason in plain words.</p>
+      <p>Green pill = assertions held, display managed. Amber outlined pill = intent kept, but Shade is not running. Grey pill = nothing held. The line beside it reports system auto-lock independently: Auto-Lock Prevented, Auto-Lock after a configured interval, Auto-Lock Disabled, or Normal Auto-Lock when unknown.</p>
     </div>
     <div class="box">
       <h5>Blocker — an actionable card, never a bare grey button</h5>
@@ -412,7 +412,7 @@ footer{margin-top:70px;padding-top:22px;border-top:1px solid var(--line);font-si
       <h5>Appearance</h5>
       <p>The icon is a filled half-circle. When Shade is not running it renders <b>dimmed</b> (macOS <code style="font-family:var(--mono);font-size:11.5px">appearsDisabled</code>); while paused it is dimmed too, because nothing is being held — the panel is where intent lives.</p>
       <ul>
-        <li>Running — full contrast, tooltip “Shade · Keeping Mac awake”</li>
+        <li>Running — full contrast, tooltip “Shade · Auto-Lock Prevented”</li>
         <li>Paused — dimmed, tooltip “Shade · Paused, waiting for power”</li>
         <li>Off — dimmed, tooltip “Shade · Off”</li>
         <li>Unavailable — dimmed, tooltip “Shade · Needs a power adapter”</li>
@@ -512,17 +512,18 @@ footer{margin-top:70px;padding-top:22px;border-top:1px solid var(--line);font-si
 <section id="matrix">
   <h2>7 · State matrix</h2>
   <h3>What the panel says, for every combination</h3>
+  <p class="section-note">10 min is a mock fixture, not a countdown. Live values use the earlier enabled idle route plus password grace. Other-app prevention shows “Auto-Lock Prevented” with “By another app”; missing data shows “Normal Auto-Lock”.</p>
   <div style="overflow-x:auto">
   <table class="tbl">
     <thead><tr><th>Intent</th><th>Power</th><th>Adapter-only</th><th>Switch</th><th>Pill · status line</th><th>Headline</th><th>Primary button</th></tr></thead>
     <tbody>
-      <tr><td>Off</td><td>AC</td><td>on/off</td><td>off, enabled</td><td>OFF</td><td>Ready to dim</td><td><code>Turn On</code></td></tr>
-      <tr><td>Off</td><td>Battery</td><td>on</td><td>off, <b>disabled</b></td><td>OFF · On battery</td><td>Needs a power adapter</td><td><code>Turn On</code> disabled + blocked card</td></tr>
-      <tr><td>Off</td><td>Battery</td><td>off</td><td>off, enabled</td><td>OFF</td><td>Ready to dim</td><td><code>Turn On</code></td></tr>
-      <tr><td>On</td><td>AC</td><td>on/off</td><td>on, green</td><td>ON · Keeping Mac awake</td><td>Dimming in m:ss</td><td><code>Dim Now</code></td></tr>
-      <tr><td>On</td><td>AC</td><td>on/off</td><td>on, green</td><td>ON · Keeping Mac awake</td><td>Display dimmed</td><td><code>Restore Display</code></td></tr>
-      <tr><td>On</td><td>Battery</td><td>on</td><td>on, <b>amber</b></td><td>ON · Paused</td><td>Waiting for power adapter</td><td><code>Turn Off</code> (cancels auto-resume)</td></tr>
-      <tr><td>On</td><td>Battery</td><td>off</td><td>on, green</td><td>ON · Keeping Mac awake</td><td>Dimming in m:ss</td><td><code>Dim Now</code></td></tr>
+      <tr><td>Off</td><td>AC</td><td>on/off</td><td>off, enabled</td><td>OFF · Auto-Lock after 10 min</td><td>Ready to dim</td><td><code>Turn On</code></td></tr>
+      <tr><td>Off</td><td>Battery</td><td>on</td><td>off, <b>disabled</b></td><td>OFF · Auto-Lock after 10 min</td><td>Needs a power adapter</td><td><code>Turn On</code> disabled + blocked card</td></tr>
+      <tr><td>Off</td><td>Battery</td><td>off</td><td>off, enabled</td><td>OFF · Auto-Lock after 10 min</td><td>Ready to dim</td><td><code>Turn On</code></td></tr>
+      <tr><td>On</td><td>AC</td><td>on/off</td><td>on, green</td><td>ON · Auto-Lock Prevented</td><td>Dimming in m:ss</td><td><code>Dim Now</code></td></tr>
+      <tr><td>On</td><td>AC</td><td>on/off</td><td>on, green</td><td>ON · Auto-Lock Prevented</td><td>Display dimmed</td><td><code>Restore Display</code></td></tr>
+      <tr><td>On</td><td>Battery</td><td>on</td><td>on, <b>amber</b></td><td>ON · Auto-Lock after 10 min</td><td>Waiting for power adapter</td><td><code>Turn Off</code> (cancels auto-resume)</td></tr>
+      <tr><td>On</td><td>Battery</td><td>off</td><td>on, green</td><td>ON · Auto-Lock Prevented</td><td>Dimming in m:ss</td><td><code>Dim Now</code></td></tr>
     </tbody>
   </table>
   </div>
@@ -599,11 +600,9 @@ function mainPage(s){
   const pillCls  = d.active ? "on" : d.paused ? "paused" : "";
   const pillText = (d.active || d.paused) ? "ON" : "OFF";
   const status =
-      d.dimmed  ? "Keeping Mac awake"
-    : d.armed   ? "Keeping Mac awake"
-    : d.paused  ? "Paused"
-    : d.blocked ? "On battery"
-    :             "";
+      d.dimmed  ? "Auto-Lock Prevented"
+    : d.armed   ? "Auto-Lock Prevented"
+    :             "Auto-Lock after 10 min";
 
   const headline =
       d.dimmed  ? "Display dimmed"
@@ -916,10 +915,8 @@ function render(){
 
   mbIcon.classList.toggle("off", !d.active);
   mbTip.textContent = "Tooltip: Shade · " + (
-      d.active  ? "Keeping Mac awake"
-    : d.paused  ? "Paused, waiting for power"
-    : d.blocked ? "Needs a power adapter"
-    :             "Off");
+      d.active  ? "Auto-Lock Prevented"
+    :             "Auto-Lock after 10 min");
 
   const dis = document.getElementById("simBright");
   dis.disabled = !d.dimmed;

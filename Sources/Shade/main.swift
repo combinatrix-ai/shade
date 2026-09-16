@@ -5,6 +5,14 @@ import SwiftUI
 
 signal(SIGPIPE, SIG_IGN)
 
+if CommandLine.arguments.contains("--lock-status") {
+    let snapshot = AutoLockMonitor.read()
+    print("display: \(snapshot.display); screensaver: \(snapshot.screensaver); password: \(snapshot.password)")
+    print("display prevented: \(String(describing: snapshot.displayPrevented)); screensaver prevented: \(String(describing: snapshot.screensaverPrevented))")
+    print(snapshot.status.label)
+    exit(0)
+}
+
 if CommandLine.arguments.contains("--restore-guard") {
     runRestoreGuard()
 }
@@ -42,11 +50,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         item.button?.target = self; item.button?.action = #selector(handleIconClick)
         item.button?.sendAction(on: [.leftMouseUp, .rightMouseUp])
         item.button?.toolTip = "Shade · Off"
-        model.$session.combineLatest(model.$waitingForPower, model.$adapterConnected, model.$onlyOnPowerAdapter)
-            .sink { [weak self] session, waiting, connected, adapterOnly in
-                self?.item.button?.appearsDisabled = !session.isOn
-                let status = session.isOn ? "Keeping Mac awake" : waiting ? "Paused, waiting for power" : adapterOnly && !connected ? "Needs a power adapter" : "Off"
-                self?.item.button?.toolTip = "Shade · " + status
+        model.$session.combineLatest(model.$autoLockSnapshot)
+            .sink { [weak self] session, snapshot in
+                guard let self else { return }
+                self.item.button?.appearsDisabled = !session.isOn
+                let status = self.model.demo ? (session.isOn ? "Auto-Lock Prevented" : "Auto-Lock after 10 min") : snapshot.status.label
+                self.item.button?.toolTip = "Shade · " + status
             }.store(in: &subscriptions)
         if !model.demo, Bundle.main.object(forInfoDictionaryKey: "SUPublicEDKey") != nil {
             updater = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil)
