@@ -1,4 +1,5 @@
 import AppKit
+import IOKit
 import IOKit.pwr_mgt
 import IOKit.ps
 
@@ -29,12 +30,15 @@ final class Brightness {
     }
 
     deinit { dlclose(handle) }
-    func internalDisplay() throws -> CGDirectDisplayID {
+    func internalDisplayID() -> CGDirectDisplayID? {
         var ids = [CGDirectDisplayID](repeating: 0, count: 16)
         var count: UInt32 = 0
-        guard CGGetOnlineDisplayList(16, &ids, &count) == .success,
-              let id = ids.prefix(Int(count)).first(where: { CGDisplayIsBuiltin($0) != 0 })
-        else {
+        guard CGGetOnlineDisplayList(16, &ids, &count) == .success else { return nil }
+        return ids.prefix(Int(count)).first(where: { CGDisplayIsBuiltin($0) != 0 })
+    }
+
+    func internalDisplay() throws -> CGDirectDisplayID {
+        guard let id = internalDisplayID() else {
             throw ShadeFailure(message: "No built-in display found.")
         }
         return id
@@ -53,6 +57,21 @@ final class Brightness {
     }
 }
 
+enum ClamshellState {
+    static func isClosed() -> Bool {
+        let root = IORegistryEntryFromPath(kIOMainPortDefault, "IOService:/")
+        guard root != IO_OBJECT_NULL else { return false }
+        defer { IOObjectRelease(root) }
+        guard let value = IORegistryEntryCreateCFProperty(
+            root,
+            "AppleClamshellState" as CFString,
+            kCFAllocatorDefault,
+            0
+        )?.takeRetainedValue() else { return false }
+        return value as? Bool == true
+    }
+}
+
 final class AwakeHold {
     private var process: Process?
     var isRunning: Bool {
@@ -67,9 +86,14 @@ final class AwakeHold {
         p.executableURL = URL(fileURLWithPath: "/usr/bin/caffeinate")
         // -w binds the assertions to Shade's lifetime, including a crash.
         // -t keeps UserIsActive alive beyond caffeinate's default five seconds.
-        p.arguments = ["-d", "-i", "-u", "-t", "28800", "-w", String(getpid())]
+        // -s also prevents system sleep on AC power while the lid is closed.
+        p.arguments = Self.arguments(parentPID: getpid())
         try p.run()
         process = p
+    }
+
+    static func arguments(parentPID: Int32) -> [String] {
+        ["-d", "-i", "-s", "-u", "-t", "28800", "-w", String(parentPID)]
     }
 
     func stop() {
@@ -125,7 +149,14 @@ final class RestoreGuard {
         }
     }
 
-    deinit { finish() }
+    func handOff() {
+        // Closing without the disarm byte tells the child to perform recovery.
+        let input = pipe
+        pipe = nil; process = nil
+        try? input?.fileHandleForWriting.close()
+    }
+
+    deinit { handOff() }
 }
 
 func runRestoreGuard() -> Never {
@@ -138,11 +169,17 @@ func runRestoreGuard() -> Never {
     if command == Data([0x43]) {
         exit(0)
     }
-    for _ in 0 ..< 5 {
-        if (try? brightness.set(display, original)) != nil {
+    for attempt in 0 ..< 28_800 {
+        let target = brightness.internalDisplayID() ?? display
+        if (try? brightness.set(target, original)) != nil {
             exit(0)
         }
-        Thread.sleep(forTimeInterval: 0.2)
+        // Retry quickly for ordinary transient failures. If the parent exited
+        // with the lid closed, remain as the recovery owner until it opens.
+        if attempt >= 4, !ClamshellState.isClosed() {
+            break
+        }
+        Thread.sleep(forTimeInterval: attempt < 4 ? 0.2 : 1)
     }
     exit(1)
 }

@@ -2,7 +2,7 @@ import Foundation
 
 public enum ActivityResponse { case none, postpone, restore }
 
-public enum Phase: Equatable { case off, pending(deadline: Date), dark }
+public enum Phase: Equatable { case off, pending(deadline: Date), dark, clamshell }
 
 /// State transitions are committed only after the associated system operation succeeds.
 public struct Session {
@@ -18,12 +18,27 @@ public struct Session {
         phase = .pending(deadline: now.addingTimeInterval(delay))
     }
 
+    public mutating func enableClamshell() {
+        phase = .clamshell
+    }
+
     public mutating func disable() {
         phase = .off
     }
 
     public mutating func reserve(now: Date, delay: TimeInterval) {
-        guard isOn, phase != .dark else { return }
+        guard isOn, phase != .dark, phase != .clamshell else { return }
+        countdownDuration = delay
+        phase = .pending(deadline: now.addingTimeInterval(delay))
+    }
+
+    public mutating func enterClamshell() {
+        guard isOn else { return }
+        phase = .clamshell
+    }
+
+    public mutating func displayDidReturn(now: Date, delay: TimeInterval) {
+        guard phase == .clamshell else { return }
         countdownDuration = delay
         phase = .pending(deadline: now.addingTimeInterval(delay))
     }
@@ -34,6 +49,7 @@ public struct Session {
         case .off: return .none
         case .pending: return .postpone
         case .dark: return wakeOnTouch ? .restore : .none
+        case .clamshell: return .none
         }
     }
 
@@ -45,7 +61,7 @@ public struct Session {
     }
 
     public mutating func didDim() {
-        if isOn {
+        if case .pending = phase {
             phase = .dark
         }
     }

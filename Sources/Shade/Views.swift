@@ -57,7 +57,7 @@ struct PanelView: View {
             if let detail = model.autoLockDetail {
                 Text(detail).font(.system(size: 10)).foregroundStyle(.secondary).padding(.top, 4)
             }
-            if model.isOn && !model.isDark {
+            if model.isOn && !model.isDark && !model.isClamshell {
                 Button { model.editingDelay.toggle() } label: {
                     HStack {
                         Text(model.title).monospacedDigit()
@@ -82,10 +82,14 @@ struct PanelView: View {
                 Text(model.title).font(.system(size: 21, weight: .semibold)).tracking(-0.6)
                     .fixedSize(horizontal: false, vertical: true).padding(.top, 14)
             }
+            if let detail = model.displayDetail {
+                Text(detail).font(.system(size: 11)).foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true).padding(.top, 8)
+            }
             if !model.isOn && !model.waitingForPower && !model.blockedByPower {
                 Text("Auto-dim after " + model.delayLabel).font(.system(size: 11)).foregroundStyle(.secondary).padding(.top, 8)
             }
-            if model.isOn && !model.isDark {
+            if model.isOn && !model.isDark && !model.isClamshell {
                 ProgressView(value: Double(model.session.remaining(now: model.now)), total: model.delay)
                     .tint(ShadeStyle.green).padding(.top, 18)
             }
@@ -128,7 +132,7 @@ struct PanelView: View {
             }.buttonStyle(.plain).font(.system(size: 12)).padding(.top, 12)
         }.padding(22).frame(width: 320)
             .onAppear { model.refreshAutoLock(force: true) }
-            .onChange(of: model.isOn && !model.isDark) { _, pending in
+            .onChange(of: model.isOn && !model.isDark && !model.isClamshell) { _, pending in
                 if !pending { model.editingDelay = false }
             }
             .onDisappear { model.editingDelay = false }

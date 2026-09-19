@@ -77,4 +77,31 @@ final class SessionTests: XCTestCase {
         XCTAssertEqual(s.remaining(now: now.addingTimeInterval(90)), 60)
         XCTAssertTrue(s.isDue(now: now.addingTimeInterval(150)))
     }
+
+    func testClamshellKeepsSessionOnWithoutRunningADimmingDeadline() {
+        var s = Session()
+        s.enableClamshell()
+        XCTAssertTrue(s.isOn)
+        XCTAssertEqual(s.phase, .clamshell)
+        XCTAssertFalse(s.isDue(now: now.addingTimeInterval(10_000)))
+        XCTAssertEqual(s.remaining(now: now), 0)
+        XCTAssertEqual(s.activityResponse(detected: true, wakeOnTouch: true), .none)
+
+        s.reserve(now: now, delay: 60)
+        s.didDim()
+        XCTAssertEqual(s.phase, .clamshell)
+    }
+
+    func testDisplayReturnStartsAFreshCountdown() {
+        var s = Session()
+        s.enable(now: now, delay: 60)
+        s.enterClamshell()
+        XCTAssertEqual(s.phase, .clamshell)
+
+        let opened = now.addingTimeInterval(500)
+        s.displayDidReturn(now: opened, delay: 300)
+        XCTAssertEqual(s.remaining(now: opened), 300)
+        XCTAssertFalse(s.isDue(now: opened.addingTimeInterval(299)))
+        XCTAssertTrue(s.isDue(now: opened.addingTimeInterval(300)))
+    }
 }

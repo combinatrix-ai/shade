@@ -19,6 +19,7 @@ We expect this kind of separation between an agent's working session and the phy
 - **Only on power adapter** defaults on. Unplugging restores brightness and pauses Shade, releasing its sleep-prevention assertions. Reconnecting resumes the session with a fresh dimming countdown. Turning Shade off while paused cancels automatic resume. Sleep, switching user sessions, or quitting also cancels it. Turn this setting off to use Shade on battery.
 - Starts off. Double-click or right-click the menu bar icon to toggle wake prevention. A single click opens the panel after the system double-click interval.
 - After 1 minute without hardware input (configurable: 1–60 minutes, in whole minutes), sets the built-in display's brightness to zero. Physical keyboard and pointer activity postpone dimming while the display is visible.
+- With the lid closed on power adapter, Shade enters **Clamshell mode**: it keeps the Mac awake without requiring a built-in display target. External and virtual displays are left unchanged. Opening the lid starts a fresh dimming countdown.
 - Click **Dimming in m:ss** to choose a delay using the slider, minute field, or presets. **Set timer** restarts the countdown from that moment and saves the delay for future sessions; **Cancel** or Escape discards the edit. The same control is available under **Settings → Dim after**.
 - Press **Control + Option + Command + D** to restore the saved brightness. Keeping the Mac awake continues.
 - Restoring the display automatically starts a fresh dimming countdown. The shortcut restarts that countdown while visible. The brightness-up key also returns to automatic dimming, preserving the brightness you chose. With **Wake on touch** enabled, physical trackpad movement, mouse activity, or typing restores the display and starts a fresh countdown. It defaults off; resting a finger without generating input is not detected.
@@ -63,7 +64,7 @@ The original brightness is read immediately before each dim. Before setting it t
 
 Display control uses the private macOS `DisplayServices` framework because macOS does not expose a suitable public built-in brightness API. Availability is checked at runtime and dimming fails closed if unavailable. Future OS updates can require maintenance. No screen overlay, simulated user input, display disconnect, screenshot, or persistent lock-setting change is used.
 
-Dimming is not a security boundary; anyone can restore the display. Only the built-in display is supported. Lid-closed operation and external displays are outside the scope of this version. Automatic brightness behavior and sleep overrides may vary with hardware or managed-device policy; verify on the target Mac.
+Dimming is not a security boundary; anyone can restore the display. Brightness control is limited to the built-in display. Clamshell mode only holds sleep-prevention assertions and does not dim external or virtual displays. macOS applies the system-sleep assertion on AC power; lid-closed use on battery is not supported. Automatic brightness behavior and sleep overrides may vary with hardware or managed-device policy; verify on the target Mac.
 
 ## Verification
 

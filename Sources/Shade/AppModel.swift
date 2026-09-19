@@ -125,6 +125,10 @@ final class AppModel: ObservableObject {
         session.phase == .dark
     }
 
+    var isClamshell: Bool {
+        session.phase == .clamshell
+    }
+
     var keyLabel: String {
         shortcut.label
     }
@@ -134,7 +138,12 @@ final class AppModel: ObservableObject {
         case .off: return waitingForPower ? "Waiting for power adapter" : (blockedByPower ? "Needs a power adapter" : "Ready to dim")
         case .pending: let t = session.remaining(now: now); return String(format: "Dimming in %d:%02d", t / 60, t % 60)
         case .dark: return "Display dimmed"
+        case .clamshell: return "Clamshell mode"
         }
+    }
+
+    var displayDetail: String? {
+        isClamshell ? "Keeping this Mac awake. The built-in display is already off." : nil
     }
 
     var delayLabel: String { "\(Int(delay / 60)) min" }
@@ -170,7 +179,12 @@ final class AppModel: ObservableObject {
     }
 
     var actionLabel: String {
-        switch session.phase { case .off: return waitingForPower ? "Turn Off" : "Turn On"; case .pending: return "Dim Now"; case .dark: return "Restore Display" }
+        switch session.phase {
+        case .off: return waitingForPower ? "Turn Off" : "Turn On"
+        case .pending: return "Dim Now"
+        case .dark: return "Restore Display"
+        case .clamshell: return "Turn Off"
+        }
     }
 
     func toggle() {
@@ -218,15 +232,23 @@ final class AppModel: ObservableObject {
         do {
             if !demo {
                 let service = try Brightness()
-                let id = try service.internalDisplay()
-                _ = try service.get(id)
+                let display = service.internalDisplayID()
+                if let display {
+                    _ = try service.get(display)
+                } else if !ClamshellState.isClosed() {
+                    throw ShadeFailure(message: "No built-in display found.")
+                }
                 brightness = service
                 try activity.start()
                 try awake.start()
             }
             now = Date()
             enabledAt = now
-            session.enable(now: now, delay: delay)
+            if !demo, brightness?.internalDisplayID() == nil {
+                session.enableClamshell()
+            } else {
+                session.enable(now: now, delay: delay)
+            }
             refreshAutoLock(force: true)
         } catch { self.error = error.localizedDescription; awake.stop(); activity.stop() }
     }
@@ -241,11 +263,16 @@ final class AppModel: ObservableObject {
     }
 
     func primaryAction() {
-        switch session.phase { case .off: toggle(); case .pending: dim(); case .dark: _ = restore() }
+        switch session.phase {
+        case .off: toggle()
+        case .pending: dim()
+        case .dark: _ = restore()
+        case .clamshell: disable()
+        }
     }
 
     func shortcutAction() {
-        guard isOn else { return }; if isDark {
+        guard isOn, !isClamshell else { return }; if isDark {
             _ = restore()
         } else {
             reserve()
@@ -264,7 +291,7 @@ final class AppModel: ObservableObject {
     }
 
     func dim() {
-        guard isOn, !isDark else { return }
+        guard isOn, !isDark, !isClamshell else { return }
         guard powerPermitsSession else { enforcePowerPolicy(); return }
         error = nil
         if demo {
@@ -295,7 +322,10 @@ final class AppModel: ObservableObject {
         if let snapshot {
             do {
                 guard let brightness else { return false }
-                try brightness.set(snapshot.display, snapshot.value)
+                guard let display = brightness.internalDisplayID() else {
+                    throw ShadeFailure(message: "The built-in display is offline. Brightness will restore when it returns.")
+                }
+                try brightness.set(display, snapshot.value)
                 restoreGuard?.finish(); restoreGuard = nil
                 self.snapshot = nil
             } catch { self.error = "Could not restore brightness. Use your brightness keys.\n" + error.localizedDescription; return false }
@@ -335,7 +365,8 @@ final class AppModel: ObservableObject {
         now = Date()
         enforcePowerPolicy()
         refreshAutoLock()
-        if isOn, !demo, !keyboard.ready || !awake.isRunning || (isDark && restoreGuard?.isRunning != true) {
+        refreshDisplayState()
+        if isOn, !demo, !keyboard.ready || !awake.isRunning || (snapshot != nil && restoreGuard?.isRunning != true) {
             error = "Shade stopped: shortcut or sleep prevention unavailable."
             disable()
             return
@@ -343,7 +374,7 @@ final class AppModel: ObservableObject {
         if let enabledAt, now.timeIntervalSince(enabledAt) >= 28790 {
             disable(); return
         }
-        if isOn, !demo {
+        if isOn, !demo, !isClamshell {
             guard let active = activity.sample() else {
                 error = "Shade stopped: hardware activity detection unavailable."
                 disable()
@@ -370,9 +401,38 @@ final class AppModel: ObservableObject {
         }
     }
 
+    private func refreshDisplayState() {
+        guard !demo, let brightness else { return }
+        let display = brightness.internalDisplayID()
+        if isClamshell {
+            guard let display else { return }
+            do {
+                _ = try brightness.get(display)
+                if snapshot != nil, !restore() { return }
+                now = Date()
+                session.displayDidReturn(now: now, delay: delay)
+                error = nil
+            } catch {
+                self.error = error.localizedDescription
+            }
+            return
+        }
+        if isOn, display == nil, ClamshellState.isClosed() {
+            editingDelay = false
+            session.enterClamshell()
+            return
+        }
+        if !isOn, snapshot != nil, display != nil, restore() {
+            error = nil
+        }
+    }
+
     func shutdown() {
         shuttingDown = true
         timer?.invalidate(); timer = nil
-        _ = restore(); restoreGuard?.finish(); restoreGuard = nil; awake.stop(); activity.stop(); keyboard.stop()
+        if !restore() {
+            restoreGuard?.handOff()
+        }
+        restoreGuard = nil; awake.stop(); activity.stop(); keyboard.stop()
     }
 }
