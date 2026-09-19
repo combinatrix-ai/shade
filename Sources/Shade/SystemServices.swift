@@ -92,7 +92,7 @@ final class Brightness {
 
     private func resolve(_ snapshot: DisplaySnapshot) throws -> CGDirectDisplayID {
         let displays = onlineDisplayIDs()
-        if displays.contains(snapshot.id) {
+        if displays.contains(snapshot.id), snapshot.identity.matches(display: snapshot.id) {
             return snapshot.id
         }
         if let display = displays.first(where: { snapshot.identity.matches(display: $0) }) {
@@ -309,7 +309,7 @@ final class RestoreGuard {
         p.standardInput = input
         p.standardOutput = ready
         try p.run()
-        // Child confirms that it has loaded the brightness API before we dim.
+        // Child confirms that it captured every recovery value before we dim.
         var descriptor = pollfd(fd: ready.fileHandleForReading.fileDescriptor, events: Int16(POLLIN), revents: 0)
         guard poll(&descriptor, 1, 3000) > 0 else {
             try? input.fileHandleForWriting.close()

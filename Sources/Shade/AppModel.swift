@@ -340,7 +340,7 @@ final class AppModel: ObservableObject {
                 try brightness.restore(snapshot)
                 restoreGuard?.finish(); restoreGuard = nil
                 self.snapshot = nil
-            } catch { self.error = "Could not restore brightness. Use your brightness keys.\n" + error.localizedDescription; return false }
+            } catch { self.error = "Could not restore every display. Use the Shade shortcut or reconnect the display.\n" + error.localizedDescription; return false }
         }
         now = Date()
         session.didRestore(now: now, delay: delay)
