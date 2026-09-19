@@ -501,10 +501,14 @@ footer{margin-top:70px;padding-top:22px;border-top:1px solid var(--line);font-si
       <b>Settings marks the setting that is blocking right now<span class="tag same">visual</span></b>
       <p>バッテリー動作中で <code>onlyOnPowerAdapter</code> が ON の場合、その行に「ON BATTERY」バッジを付ける。設定画面と主画面の因果を結ぶ。</p>
     </li>
+    <li>
+      <b>Clamshell mode keeps the Mac awake without a display target<span class="tag same">approved</span></b>
+      <p>内蔵ディスプレイが online display list にない状態でも ON にでき、スリープ防止を継続する。外部・仮想ディスプレイは変更しない。内蔵ディスプレイが戻ると通常の暗転カウントダウンを開始する。</p>
+    </li>
   </ol>
   <div class="box" style="margin-top:22px">
     <h5>Unchanged, deliberately</h5>
-    <p>320&nbsp;pt 幅・単一パネル内の Settings/Tutorial・手動 OFF 起動・8 時間上限・ロック設定を触らない方針・外部ディスプレイ非対応・「これはセキュリティではない」という位置づけ。チュートリアル下部の赤い 2 行は仕様どおり最下部に固定し、「Don’t show on startup」は初期状態で未チェック。</p>
+    <p>320&nbsp;pt 幅・単一パネル内の Settings/Tutorial・手動 OFF 起動・8 時間上限・ロック設定を触らない方針・外部ディスプレイの輝度は変更しない方針・「これはセキュリティではない」という位置づけ。チュートリアル下部の赤い 2 行は仕様どおり最下部に固定し、「Don’t show on startup」は初期状態で未チェック。</p>
   </div>
 </section>
 
@@ -521,6 +525,7 @@ footer{margin-top:70px;padding-top:22px;border-top:1px solid var(--line);font-si
       <tr><td>Off</td><td>Battery</td><td>on</td><td>off, <b>disabled</b></td><td>OFF · Auto-Lock after 10 min</td><td>Needs a power adapter</td><td><code>Turn On</code> disabled + blocked card</td></tr>
       <tr><td>Off</td><td>Battery</td><td>off</td><td>off, enabled</td><td>OFF · Auto-Lock after 10 min</td><td>Ready to dim</td><td><code>Turn On</code></td></tr>
       <tr><td>On</td><td>AC</td><td>on/off</td><td>on, green</td><td>ON · Auto-Lock Prevented</td><td>Dimming in m:ss</td><td><code>Dim Now</code></td></tr>
+      <tr><td>On</td><td>AC · lid closed</td><td>on/off</td><td>on, green</td><td>ON · Auto-Lock Prevented</td><td>Clamshell mode</td><td><code>Turn Off</code></td></tr>
       <tr><td>On</td><td>AC</td><td>on/off</td><td>on, green</td><td>ON · Auto-Lock Prevented</td><td>Display dimmed</td><td><code>Restore Display</code></td></tr>
       <tr><td>On</td><td>Battery</td><td>on</td><td>on, <b>amber</b></td><td>ON · Auto-Lock after 10 min</td><td>Waiting for power adapter</td><td><code>Turn Off</code> (cancels auto-resume)</td></tr>
       <tr><td>On</td><td>Battery</td><td>off</td><td>on, green</td><td>ON · Auto-Lock Prevented</td><td>Dimming in m:ss</td><td><code>Dim Now</code></td></tr>
@@ -532,7 +537,7 @@ footer{margin-top:70px;padding-top:22px;border-top:1px solid var(--line);font-si
 
 <footer>
   <p>mock-opus.html — self-contained design proposal for Shade. No external assets, fonts, scripts, or network requests. System font stack only. All display, power, and update behavior is simulated in-page.<br>
-  Sources read: <code style="font-family:var(--mono)">Sources/Shade/{AppModel,Views,PanelRoot,main}.swift</code>, <code style="font-family:var(--mono)">docs/mock.html</code>, <code style="font-family:var(--mono)">README.md</code>. Implementation requires separate approval.</p>
+  Sources read: <code style="font-family:var(--mono)">Sources/Shade/{AppModel,Views,PanelRoot,main}.swift</code>, <code style="font-family:var(--mono)">docs/mock.html</code>, <code style="font-family:var(--mono)">README.md</code>. Clamshell behavior approved 2026-09-19.</p>
 </footer>
 
 </div>
@@ -550,6 +555,7 @@ const VERSION = "1.0.2";
 const DEFAULTS = {
   intent:false,          // user's wish: the header switch
   phase:"armed",         // runtime phase when active: "armed" | "dimmed"
+  clamshell:false,       // no online built-in display; keep-awake still runs
   power:"ac",            // "ac" | "battery"
   adapterOnly:true,
   delay:60,
@@ -605,17 +611,20 @@ function mainPage(s){
     :             "Auto-Lock after 10 min";
 
   const headline =
-      d.dimmed  ? "Display dimmed"
+      d.active && s.clamshell ? "Clamshell mode"
+    : d.dimmed  ? "Display dimmed"
     : d.armed   ? "Dimming in " + fmt(s.remaining)
     : d.paused  ? "Waiting for power adapter"
     : d.blocked ? "Needs a power adapter"
     :             "Ready to dim";
 
-  const sub = !d.active && !d.paused && !d.blocked ? "Auto-dim after " + delayLabel(s.delay) : "";
+  const sub = d.active && s.clamshell
+    ? "Keeping this Mac awake. The built-in display is already off."
+    : !d.active && !d.paused && !d.blocked ? "Auto-dim after " + delayLabel(s.delay) : "";
 
   /* countdown meter, capped at the chosen delay */
   let meter = "";
-  if (d.armed){
+  if (d.armed && !s.clamshell){
     const pct = Math.max(0, Math.min(100, (s.remaining / s.delay) * 100));
     meter = '<div class="meter"><i style="width:' + pct.toFixed(1) + '%"></i></div>'
           ;
@@ -642,12 +651,13 @@ function mainPage(s){
 
   /* primary action */
   const btnLabel =
-      d.dimmed  ? "Restore Display"
+      d.active && s.clamshell ? "Turn Off"
+    : d.dimmed  ? "Restore Display"
     : d.armed   ? "Dim Now"
     : d.paused  ? "Turn Off"
     :             "Turn On";
   const btnCls  = d.paused ? "neutral" : "primary";
-  const btnAct  = d.dimmed ? "restore" : d.armed ? "dim" : d.paused ? "turnOff" : "turnOn";
+  const btnAct  = d.active && s.clamshell ? "turnOff" : d.dimmed ? "restore" : d.armed ? "dim" : d.paused ? "turnOff" : "turnOn";
   const btnOff  = d.blocked ? " disabled" : "";
 
   /* Show recovery guidance only when the display is dimmed. */
@@ -772,6 +782,11 @@ const SCREENS = [
     s:"Assertions held, brightness still up.",
     ja:"実行中。帯は<b>選択した遅延に対する残量</b>で、上限を超えないことが視覚的に保証される。ハードウェア入力で再武装しても帯は満タンに戻るだけ。",
     st:{intent:true, phase:"armed", remaining:47} },
+
+  { id:"clamshell", t:"On · clamshell mode",
+    s:"Sleep prevention stays active while the built-in display is offline.",
+    ja:"蓋を閉じて内蔵画面が online display list から消えてもエラーにせず、<b>スリープ防止だけを継続</b>する。外部・仮想ディスプレイは変更しない。蓋を開くと通常の暗転カウントダウンへ移る。",
+    st:{intent:true, clamshell:true} },
 
   { id:"dimmed", t:"Dimmed · restore available",
     s:"Brightness zero, Mac awake, Computer Use continues.",
