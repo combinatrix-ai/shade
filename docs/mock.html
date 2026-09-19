@@ -392,7 +392,7 @@ footer{margin-top:70px;padding-top:22px;border-top:1px solid var(--line);font-si
       </div>
     </div>
   </div>
-  <p class="ja" style="margin-top:18px"><b>試す順序の例：</b>①「Power adapter」で Turn On → カウントダウン →「Dim Now」→「Restore Display」で満了時間から再スタート。②実行中に「Battery」へ切替 → Paused（スイッチは ON のまま琥珀）。③「Power adapter」に戻す → 自動再開。④ Paused で「Turn Off」→ 再接続しても復帰しない。⑤ OFF のままバッテリーへ → 不可カードと「Allow on Battery」。</p>
+  <p class="ja" style="margin-top:18px"><b>試す順序の例：</b>①「Power adapter」で Turn On → カウントダウン →「Dim Now」→「Restore Displays」で満了時間から再スタート。②実行中に「Battery」へ切替 → Paused（スイッチは ON のまま琥珀）。③「Power adapter」に戻す → 自動再開。④ Paused で「Turn Off」→ 再接続しても復帰しない。⑤ OFF のままバッテリーへ → 不可カードと「Allow on Battery」。</p>
 </section>
 
 <!-- ══════════════ 3. OVERVIEW ══════════════ -->
@@ -473,9 +473,9 @@ footer{margin-top:70px;padding-top:22px;border-top:1px solid var(--line);font-si
 
 <!-- ══════════════ 6. CHANGES ══════════════ -->
 <section id="changes">
-  <h2>6 · Proposed behavior changes</h2>
-  <h3>挙動変更の提案（実装は未承認）</h3>
-  <p class="section-note">Everything not listed here is a visual restatement of the shipped behavior in <code style="font-family:var(--mono);font-size:12px">AppModel.swift</code> / <code style="font-family:var(--mono);font-size:12px">Views.swift</code>. The items below change what the app <em>does</em> and need approval before implementation.</p>
+  <h2>6 · Behavior changes</h2>
+  <h3>挙動変更（clamshell・全display暗転は承認済み）</h3>
+  <p class="section-note">Everything not listed here is a visual restatement of the shipped behavior in <code style="font-family:var(--mono);font-size:12px">AppModel.swift</code> / <code style="font-family:var(--mono);font-size:12px">Views.swift</code>. Clamshell support and all-display dimming were approved on 2026-09-19.</p>
   <ol class="chgs">
     <li>
       <b>“Allow on Battery” button inside the blocked card<span class="tag new">behavior</span></b>
@@ -503,12 +503,16 @@ footer{margin-top:70px;padding-top:22px;border-top:1px solid var(--line);font-si
     </li>
     <li>
       <b>Clamshell mode keeps the Mac awake without a display target<span class="tag same">approved</span></b>
-      <p>内蔵ディスプレイが online display list にない状態でも ON にでき、スリープ防止を継続する。外部・仮想ディスプレイは変更しない。内蔵ディスプレイが戻ると通常の暗転カウントダウンを開始する。</p>
+      <p><code>IOPMrootDomain</code> の lid state を参照し、online display が 0 台でも蓋が閉じていれば ON にできる。display が現れると通常の暗転カウントダウンを開始する。</p>
+    </li>
+    <li>
+      <b>Every online display dims together<span class="tag same">approved</span></b>
+      <p>内蔵だけでなく外部・仮想displayも同じ暗転対象にする。native brightnessを使えるdisplayは輝度0、使えないdisplayはgamma tableを0へ落とす。黒いwindowは重ねず、Computer Useがdesktopを読み続けられる構成にする。</p>
     </li>
   </ol>
   <div class="box" style="margin-top:22px">
     <h5>Unchanged, deliberately</h5>
-    <p>320&nbsp;pt 幅・単一パネル内の Settings/Tutorial・手動 OFF 起動・8 時間上限・ロック設定を触らない方針・外部ディスプレイの輝度は変更しない方針・「これはセキュリティではない」という位置づけ。チュートリアル下部の赤い 2 行は仕様どおり最下部に固定し、「Don’t show on startup」は初期状態で未チェック。</p>
+    <p>320&nbsp;pt 幅・単一パネル内の Settings/Tutorial・手動 OFF 起動・8 時間上限・ロック設定を触らない方針・「これはセキュリティではない」という位置づけ。チュートリアル下部の赤い 2 行は仕様どおり最下部に固定し、「Don’t show on startup」は初期状態で未チェック。</p>
   </div>
 </section>
 
@@ -526,7 +530,7 @@ footer{margin-top:70px;padding-top:22px;border-top:1px solid var(--line);font-si
       <tr><td>Off</td><td>Battery</td><td>off</td><td>off, enabled</td><td>OFF · Auto-Lock after 10 min</td><td>Ready to dim</td><td><code>Turn On</code></td></tr>
       <tr><td>On</td><td>AC</td><td>on/off</td><td>on, green</td><td>ON · Auto-Lock Prevented</td><td>Dimming in m:ss</td><td><code>Dim Now</code></td></tr>
       <tr><td>On</td><td>AC · lid closed</td><td>on/off</td><td>on, green</td><td>ON · Auto-Lock Prevented</td><td>Clamshell mode</td><td><code>Turn Off</code></td></tr>
-      <tr><td>On</td><td>AC</td><td>on/off</td><td>on, green</td><td>ON · Auto-Lock Prevented</td><td>Display dimmed</td><td><code>Restore Display</code></td></tr>
+      <tr><td>On</td><td>AC</td><td>on/off</td><td>on, green</td><td>ON · Auto-Lock Prevented</td><td>All displays dimmed</td><td><code>Restore Displays</code></td></tr>
       <tr><td>On</td><td>Battery</td><td>on</td><td>on, <b>amber</b></td><td>ON · Auto-Lock after 10 min</td><td>Waiting for power adapter</td><td><code>Turn Off</code> (cancels auto-resume)</td></tr>
       <tr><td>On</td><td>Battery</td><td>off</td><td>on, green</td><td>ON · Auto-Lock Prevented</td><td>Dimming in m:ss</td><td><code>Dim Now</code></td></tr>
     </tbody>
@@ -537,7 +541,7 @@ footer{margin-top:70px;padding-top:22px;border-top:1px solid var(--line);font-si
 
 <footer>
   <p>mock-opus.html — self-contained design proposal for Shade. No external assets, fonts, scripts, or network requests. System font stack only. All display, power, and update behavior is simulated in-page.<br>
-  Sources read: <code style="font-family:var(--mono)">Sources/Shade/{AppModel,Views,PanelRoot,main}.swift</code>, <code style="font-family:var(--mono)">docs/mock.html</code>, <code style="font-family:var(--mono)">README.md</code>. Clamshell behavior approved 2026-09-19.</p>
+  Sources read: <code style="font-family:var(--mono)">Sources/Shade/{AppModel,Views,PanelRoot,main}.swift</code>, <code style="font-family:var(--mono)">docs/mock.html</code>, <code style="font-family:var(--mono)">README.md</code>. Clamshell and all-display behavior approved 2026-09-19.</p>
 </footer>
 
 </div>
@@ -612,7 +616,7 @@ function mainPage(s){
 
   const headline =
       d.active && s.clamshell ? "Clamshell mode"
-    : d.dimmed  ? "Display dimmed"
+    : d.dimmed  ? "All displays dimmed"
     : d.armed   ? "Dimming in " + fmt(s.remaining)
     : d.paused  ? "Waiting for power adapter"
     : d.blocked ? "Needs a power adapter"
@@ -652,7 +656,7 @@ function mainPage(s){
   /* primary action */
   const btnLabel =
       d.active && s.clamshell ? "Turn Off"
-    : d.dimmed  ? "Restore Display"
+    : d.dimmed  ? "Restore Displays"
     : d.armed   ? "Dim Now"
     : d.paused  ? "Turn Off"
     :             "Turn On";
@@ -785,12 +789,12 @@ const SCREENS = [
 
   { id:"clamshell", t:"On · clamshell mode",
     s:"Sleep prevention stays active while the built-in display is offline.",
-    ja:"蓋を閉じて内蔵画面が online display list から消えてもエラーにせず、<b>スリープ防止だけを継続</b>する。外部・仮想ディスプレイは変更しない。蓋を開くと通常の暗転カウントダウンへ移る。",
+    ja:"蓋を閉じて online display が0台でもエラーにせず、<b>スリープ防止を継続</b>する。外部・仮想displayが現れると通常の暗転カウントダウンへ移る。",
     st:{intent:true, clamshell:true} },
 
   { id:"dimmed", t:"Dimmed · restore available",
-    s:"Brightness zero, Mac awake, Computer Use continues.",
-    ja:"暗転中。主ボタンは「Restore Display」。復帰キーだけを短く表示する。",
+    s:"Every online display is dark, Mac awake, Computer Use continues.",
+    ja:"内蔵・外部・仮想displayの暗転中。主ボタンは「Restore Displays」。復帰キーだけを短く表示する。",
     st:{intent:true, phase:"dimmed"} },
 
   { id:"dimmed-ignore", t:"Dimmed · Wake on touch",
@@ -959,7 +963,7 @@ function dimNow(){
   if (!derive(P).armed) return;
   P.phase = "dimmed";
   P.ignore = 2;
-  log("Display dimmed");
+  log("All displays dimmed");
   render();
 }
 function restore(reason){
