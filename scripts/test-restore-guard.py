@@ -5,7 +5,7 @@ import subprocess
 from pathlib import Path
 binary = Path(__file__).resolve().parents[1] / 'build/Shade.app/Contents/MacOS/Shade'
 for i in range(20):
-    child = subprocess.Popen([str(binary), '--restore-guard', '0', '0.5'], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+    child = subprocess.Popen([str(binary), '--restore-guard', '0:b:0.5'], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
     try:
         assert select.select([child.stdout], [], [], 3)[0], 'No ready acknowledgment'
         assert child.stdout.read(1) == b'\x01'

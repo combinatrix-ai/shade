@@ -51,15 +51,6 @@ final class Brightness {
         }
     }
 
-    func snapshot(display id: CGDirectDisplayID, method: DisplayMethodKind) throws -> DisplaySnapshot {
-        switch method {
-        case .brightness:
-            return DisplaySnapshot(id: id, method: .brightness(try get(id)))
-        case .gamma:
-            return DisplaySnapshot(id: id, method: .gamma(try GammaSnapshot.capture(display: id)))
-        }
-    }
-
     func dim(_ snapshots: [DisplaySnapshot]) throws {
         for snapshot in snapshots {
             let display = try resolve(snapshot)
@@ -155,6 +146,13 @@ enum DisplayDimmingMethod {
         switch self {
         case .brightness: return .brightness
         case .gamma: return .gamma
+        }
+    }
+
+    func guardArgument(display: CGDirectDisplayID) -> String {
+        switch self {
+        case let .brightness(value): return "\(display):\(kind.rawValue):\(value)"
+        case .gamma: return "\(display):\(kind.rawValue)"
         }
     }
 }
@@ -307,7 +305,7 @@ final class RestoreGuard {
         guard let executable = Bundle.main.executableURL else { throw ShadeFailure(message: "Could not start display recovery.") }
         let p = Process(), input = Pipe(), ready = Pipe()
         p.executableURL = executable
-        p.arguments = ["--restore-guard"] + snapshots.map { "\($0.id):\($0.method.kind.rawValue)" }
+        p.arguments = ["--restore-guard"] + snapshots.map { $0.method.guardArgument(display: $0.id) }
         p.standardInput = input
         p.standardOutput = ready
         try p.run()
@@ -352,15 +350,23 @@ final class RestoreGuard {
 func runRestoreGuard() -> Never {
     guard CommandLine.arguments.count >= 3,
           let brightness = try? Brightness() else { exit(1) }
-    let requests: [(CGDirectDisplayID, DisplayMethodKind)] = CommandLine.arguments.dropFirst(2).compactMap { argument in
-        let parts = argument.split(separator: ":", maxSplits: 1)
-        guard parts.count == 2,
+    let snapshots: [DisplaySnapshot] = CommandLine.arguments.dropFirst(2).compactMap { argument in
+        let parts = argument.split(separator: ":", maxSplits: 2)
+        guard parts.count >= 2,
               let display = CGDirectDisplayID(String(parts[0])),
               let method = DisplayMethodKind(rawValue: String(parts[1])) else { return nil }
-        return (display, method)
+        switch method {
+        case .brightness:
+            guard parts.count == 3,
+                  let value = Float(parts[2]), value.isFinite, (0 ... 1).contains(value) else { return nil }
+            return DisplaySnapshot(id: display, method: .brightness(value))
+        case .gamma:
+            guard parts.count == 2,
+                  let gamma = try? GammaSnapshot.capture(display: display) else { return nil }
+            return DisplaySnapshot(id: display, method: .gamma(gamma))
+        }
     }
-    guard requests.count == CommandLine.arguments.count - 2,
-          let snapshots = try? requests.map({ try brightness.snapshot(display: $0.0, method: $0.1) }) else { exit(1) }
+    guard snapshots.count == CommandLine.arguments.count - 2 else { exit(1) }
     FileHandle.standardOutput.write(Data([1]))
     let command = FileHandle.standardInput.readData(ofLength: 1)
     if command == Data([0x43]) {
