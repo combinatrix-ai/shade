@@ -118,7 +118,7 @@ struct PanelView: View {
                 .disabled(model.enableControlDisabled).padding(.top, 18)
             if model.isDark {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Restore: brightness-up or " + model.shortcut.label)
+                    Text("Restore: " + model.restoreHint)
                     if model.wakeOnTouch { Text("Or move the trackpad.") }
                 }.font(.system(size: 11)).foregroundStyle(.secondary).padding(.top, 10)
             } else if model.waitingForPower {

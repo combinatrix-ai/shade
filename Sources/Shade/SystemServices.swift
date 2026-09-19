@@ -30,18 +30,84 @@ final class Brightness {
     }
 
     deinit { dlclose(handle) }
-    func internalDisplayID() -> CGDirectDisplayID? {
-        var ids = [CGDirectDisplayID](repeating: 0, count: 16)
+    func onlineDisplayIDs() -> [CGDirectDisplayID] {
+        var ids = [CGDirectDisplayID](repeating: 0, count: 32)
         var count: UInt32 = 0
-        guard CGGetOnlineDisplayList(16, &ids, &count) == .success else { return nil }
-        return ids.prefix(Int(count)).first(where: { CGDisplayIsBuiltin($0) != 0 })
+        guard CGGetOnlineDisplayList(UInt32(ids.count), &ids, &count) == .success else { return [] }
+        return Array(ids.prefix(Int(count)))
     }
 
-    func internalDisplay() throws -> CGDirectDisplayID {
-        guard let id = internalDisplayID() else {
-            throw ShadeFailure(message: "No built-in display found.")
+    func snapshots() throws -> [DisplaySnapshot] {
+        try onlineDisplayIDs().map { id in
+            if let value = try? get(id), (try? set(id, value)) != nil {
+                return DisplaySnapshot(id: id, method: .brightness(value))
+            }
+            if let gamma = try? GammaSnapshot.capture(display: id),
+               (try? gamma.restore(display: id)) != nil
+            {
+                return DisplaySnapshot(id: id, method: .gamma(gamma))
+            }
+            throw ShadeFailure(message: "Cannot dim every online display. Display \(id) does not expose brightness or gamma control.")
         }
-        return id
+    }
+
+    func snapshot(display id: CGDirectDisplayID, method: DisplayMethodKind) throws -> DisplaySnapshot {
+        switch method {
+        case .brightness:
+            return DisplaySnapshot(id: id, method: .brightness(try get(id)))
+        case .gamma:
+            return DisplaySnapshot(id: id, method: .gamma(try GammaSnapshot.capture(display: id)))
+        }
+    }
+
+    func dim(_ snapshots: [DisplaySnapshot]) throws {
+        for snapshot in snapshots {
+            let display = try resolve(snapshot)
+            switch snapshot.method {
+            case .brightness:
+                try set(display, 0)
+            case .gamma:
+                try GammaSnapshot.black(display: display)
+            }
+        }
+    }
+
+    func restore(_ snapshots: [DisplaySnapshot]) throws {
+        var failure: Error?
+        for snapshot in snapshots {
+            do {
+                let display = try resolve(snapshot)
+                switch snapshot.method {
+                case let .brightness(value): try set(display, value)
+                case let .gamma(gamma): try gamma.restore(display: display)
+                }
+            } catch {
+                failure = error
+            }
+        }
+        if let failure {
+            throw ShadeFailure(message: "Could not restore every display. \(failure.localizedDescription)")
+        }
+    }
+
+    func hasHardwareBrightnessRestored(_ snapshots: [DisplaySnapshot]) -> Bool {
+        snapshots.contains { snapshot in
+            guard case .brightness = snapshot.method,
+                  let display = try? resolve(snapshot),
+                  let value = try? get(display) else { return false }
+            return value > 0
+        }
+    }
+
+    private func resolve(_ snapshot: DisplaySnapshot) throws -> CGDirectDisplayID {
+        let displays = onlineDisplayIDs()
+        if displays.contains(snapshot.id) {
+            return snapshot.id
+        }
+        if let display = displays.first(where: { snapshot.identity.matches(display: $0) }) {
+            return display
+        }
+        throw ShadeFailure(message: "A dimmed display is offline. It will restore when it returns.")
     }
 
     func get(_ id: CGDirectDisplayID) throws -> Float {
@@ -57,18 +123,141 @@ final class Brightness {
     }
 }
 
+fileprivate struct DisplayIdentity {
+    let builtin: Bool
+    let vendor: UInt32
+    let model: UInt32
+    let serial: UInt32
+
+    init(display: CGDirectDisplayID) {
+        builtin = CGDisplayIsBuiltin(display) != 0
+        vendor = CGDisplayVendorNumber(display)
+        model = CGDisplayModelNumber(display)
+        serial = CGDisplaySerialNumber(display)
+    }
+
+    func matches(display: CGDirectDisplayID) -> Bool {
+        let other = DisplayIdentity(display: display)
+        return builtin == other.builtin && vendor == other.vendor && model == other.model && serial == other.serial
+    }
+}
+
+enum DisplayMethodKind: String {
+    case brightness = "b"
+    case gamma = "g"
+}
+
+enum DisplayDimmingMethod {
+    case brightness(Float)
+    case gamma(GammaSnapshot)
+
+    var kind: DisplayMethodKind {
+        switch self {
+        case .brightness: return .brightness
+        case .gamma: return .gamma
+        }
+    }
+}
+
+struct DisplaySnapshot {
+    let id: CGDirectDisplayID
+    fileprivate let identity: DisplayIdentity
+    let method: DisplayDimmingMethod
+
+    init(id: CGDirectDisplayID, method: DisplayDimmingMethod) {
+        self.id = id
+        identity = DisplayIdentity(display: id)
+        self.method = method
+    }
+}
+
+struct GammaSnapshot {
+    let red: [CGGammaValue]
+    let green: [CGGammaValue]
+    let blue: [CGGammaValue]
+
+    static func capture(display: CGDirectDisplayID) throws -> GammaSnapshot {
+        let capacity = CGDisplayGammaTableCapacity(display)
+        guard capacity > 0, capacity <= 16_384 else {
+            throw ShadeFailure(message: "Display gamma control is unavailable.")
+        }
+        var red = [CGGammaValue](repeating: 0, count: Int(capacity))
+        var green = red
+        var blue = red
+        var count: UInt32 = 0
+        let result = red.withUnsafeMutableBufferPointer { redBuffer in
+            green.withUnsafeMutableBufferPointer { greenBuffer in
+                blue.withUnsafeMutableBufferPointer { blueBuffer in
+                    CGGetDisplayTransferByTable(
+                        display,
+                        capacity,
+                        redBuffer.baseAddress,
+                        greenBuffer.baseAddress,
+                        blueBuffer.baseAddress,
+                        &count
+                    )
+                }
+            }
+        }
+        guard result == .success, count > 0, count <= capacity else {
+            throw ShadeFailure(message: "Cannot read display gamma. Display will stay on.")
+        }
+        return GammaSnapshot(
+            red: Array(red.prefix(Int(count))),
+            green: Array(green.prefix(Int(count))),
+            blue: Array(blue.prefix(Int(count)))
+        )
+    }
+
+    static func black(display: CGDirectDisplayID) throws {
+        let zero = [CGGammaValue](repeating: 0, count: 2)
+        let result = zero.withUnsafeBufferPointer { buffer in
+            CGSetDisplayTransferByTable(display, UInt32(buffer.count), buffer.baseAddress, buffer.baseAddress, buffer.baseAddress)
+        }
+        guard result == .success else {
+            throw ShadeFailure(message: "Could not dim a display with gamma control.")
+        }
+    }
+
+    func restore(display: CGDirectDisplayID) throws {
+        guard red.count == green.count, red.count == blue.count, !red.isEmpty else {
+            throw ShadeFailure(message: "Saved display gamma is invalid.")
+        }
+        let result = red.withUnsafeBufferPointer { redBuffer in
+            green.withUnsafeBufferPointer { greenBuffer in
+                blue.withUnsafeBufferPointer { blueBuffer in
+                    CGSetDisplayTransferByTable(
+                        display,
+                        UInt32(redBuffer.count),
+                        redBuffer.baseAddress,
+                        greenBuffer.baseAddress,
+                        blueBuffer.baseAddress
+                    )
+                }
+            }
+        }
+        guard result == .success else {
+            throw ShadeFailure(message: "Could not restore display gamma.")
+        }
+    }
+}
+
 enum ClamshellState {
+    static func decode(_ value: Any?) -> Bool {
+        (value as? NSNumber)?.boolValue == true
+    }
+
     static func isClosed() -> Bool {
-        let root = IORegistryEntryFromPath(kIOMainPortDefault, "IOService:/")
-        guard root != IO_OBJECT_NULL else { return false }
-        defer { IOObjectRelease(root) }
+        let rootDomain = IOServiceGetMatchingService(kIOMainPortDefault, IOServiceMatching("IOPMrootDomain"))
+        guard rootDomain != IO_OBJECT_NULL else { return false }
+        defer { IOObjectRelease(rootDomain) }
         guard let value = IORegistryEntryCreateCFProperty(
-            root,
+            rootDomain,
             "AppleClamshellState" as CFString,
             kCFAllocatorDefault,
             0
         )?.takeRetainedValue() else { return false }
-        return value as? Bool == true
+        return decode(value)
     }
 }
 
@@ -113,11 +302,12 @@ final class RestoreGuard {
     }
 
     private var pipe: Pipe?
-    func start(display: UInt32, brightness: Float) throws {
+    func start(snapshots: [DisplaySnapshot]) throws {
+        guard !snapshots.isEmpty else { throw ShadeFailure(message: "No displays are available to recover.") }
         guard let executable = Bundle.main.executableURL else { throw ShadeFailure(message: "Could not start display recovery.") }
         let p = Process(), input = Pipe(), ready = Pipe()
         p.executableURL = executable
-        p.arguments = ["--restore-guard", String(display), String(brightness)]
+        p.arguments = ["--restore-guard"] + snapshots.map { "\($0.id):\($0.method.kind.rawValue)" }
         p.standardInput = input
         p.standardOutput = ready
         try p.run()
@@ -160,18 +350,24 @@ final class RestoreGuard {
 }
 
 func runRestoreGuard() -> Never {
-    guard CommandLine.arguments.count == 4,
-          let display = UInt32(CommandLine.arguments[2]),
-          let original = Float(CommandLine.arguments[3]), original.isFinite, (0 ... 1).contains(original),
+    guard CommandLine.arguments.count >= 3,
           let brightness = try? Brightness() else { exit(1) }
+    let requests: [(CGDirectDisplayID, DisplayMethodKind)] = CommandLine.arguments.dropFirst(2).compactMap { argument in
+        let parts = argument.split(separator: ":", maxSplits: 1)
+        guard parts.count == 2,
+              let display = CGDirectDisplayID(String(parts[0])),
+              let method = DisplayMethodKind(rawValue: String(parts[1])) else { return nil }
+        return (display, method)
+    }
+    guard requests.count == CommandLine.arguments.count - 2,
+          let snapshots = try? requests.map({ try brightness.snapshot(display: $0.0, method: $0.1) }) else { exit(1) }
     FileHandle.standardOutput.write(Data([1]))
     let command = FileHandle.standardInput.readData(ofLength: 1)
     if command == Data([0x43]) {
         exit(0)
     }
     for attempt in 0 ..< 28_800 {
-        let target = brightness.internalDisplayID() ?? display
-        if (try? brightness.set(target, original)) != nil {
+        if (try? brightness.restore(snapshots)) != nil {
             exit(0)
         }
         // Retry quickly for ordinary transient failures. If the parent exited

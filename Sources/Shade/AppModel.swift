@@ -58,7 +58,8 @@ final class AppModel: ObservableObject {
     private let activity = PhysicalActivity()
     private let keyboard = KeyboardListener()
     private var brightness: Brightness?
-    private var snapshot: (display: UInt32, value: Float)?
+    private var snapshot: [DisplaySnapshot]?
+    private var knownDisplayIDs = Set<CGDirectDisplayID>()
     private var restoreGuard: RestoreGuard?
     private var timer: Timer?
     private var observers: [NSObjectProtocol] = []
@@ -137,7 +138,7 @@ final class AppModel: ObservableObject {
         switch session.phase {
         case .off: return waitingForPower ? "Waiting for power adapter" : (blockedByPower ? "Needs a power adapter" : "Ready to dim")
         case .pending: let t = session.remaining(now: now); return String(format: "Dimming in %d:%02d", t / 60, t % 60)
-        case .dark: return "Display dimmed"
+        case .dark: return "All displays dimmed"
         case .clamshell: return "Clamshell mode"
         }
     }
@@ -147,6 +148,14 @@ final class AppModel: ObservableObject {
     }
 
     var delayLabel: String { "\(Int(delay / 60)) min" }
+
+    var restoreHint: String {
+        let hasHardwareBrightness = snapshot?.contains { snapshot in
+            if case .brightness = snapshot.method { return true }
+            return false
+        } == true
+        return hasHardwareBrightness ? "brightness-up or " + shortcut.label : shortcut.label
+    }
 
     func setDelay(minutes: Int) {
         guard DimmingDelay.minutes.contains(minutes) else { return }
@@ -182,7 +191,7 @@ final class AppModel: ObservableObject {
         switch session.phase {
         case .off: return waitingForPower ? "Turn Off" : "Turn On"
         case .pending: return "Dim Now"
-        case .dark: return "Restore Display"
+        case .dark: return "Restore Displays"
         case .clamshell: return "Turn Off"
         }
     }
@@ -232,19 +241,18 @@ final class AppModel: ObservableObject {
         do {
             if !demo {
                 let service = try Brightness()
-                let display = service.internalDisplayID()
-                if let display {
-                    _ = try service.get(display)
-                } else if !ClamshellState.isClosed() {
-                    throw ShadeFailure(message: "No built-in display found.")
+                let displays = service.onlineDisplayIDs()
+                if displays.isEmpty, !ClamshellState.isClosed() {
+                    throw ShadeFailure(message: "No online display found.")
                 }
                 brightness = service
+                knownDisplayIDs = Set(displays)
                 try activity.start()
                 try awake.start()
             }
             now = Date()
             enabledAt = now
-            if !demo, brightness?.internalDisplayID() == nil {
+            if !demo, brightness?.onlineDisplayIDs().isEmpty == true {
                 session.enableClamshell()
             } else {
                 session.enable(now: now, delay: delay)
@@ -300,17 +308,24 @@ final class AppModel: ObservableObject {
         guard keyboard.ready else { error = "Dimming stopped: shortcut unavailable."; disable(); return }
         do {
             guard let brightness else { throw ShadeFailure(message: "Brightness control is unavailable.") }
-            let id = try brightness.internalDisplay(), original = try brightness.get(id)
-            guard original > 0 else { throw ShadeFailure(message: "Display is already dimmed. Increase brightness and try again.") }
+            let originals = try brightness.snapshots()
+            guard !originals.isEmpty else {
+                if ClamshellState.isClosed() {
+                    session.enterClamshell()
+                    return
+                }
+                throw ShadeFailure(message: "No online display found.")
+            }
             let guardian = RestoreGuard()
-            try guardian.start(display: id, brightness: original)
-            snapshot = (id, original); restoreGuard = guardian
+            try guardian.start(snapshots: originals)
+            snapshot = originals; restoreGuard = guardian
             // Consume activity preceding Dim Now so the click that dimmed the
             // display cannot be mistaken for a subsequent wake gesture.
             guard activity.sample() != nil else {
                 throw ShadeFailure(message: "Hardware activity detection is unavailable.")
             }
-            try brightness.set(id, 0)
+            try brightness.dim(originals)
+            knownDisplayIDs = Set(originals.map(\.id))
             // Ignore the remainder of the dimming gesture, including events
             // sampled after the grace period but originating within it.
             activity.suppressDimmingGesture()
@@ -322,10 +337,7 @@ final class AppModel: ObservableObject {
         if let snapshot {
             do {
                 guard let brightness else { return false }
-                guard let display = brightness.internalDisplayID() else {
-                    throw ShadeFailure(message: "The built-in display is offline. Brightness will restore when it returns.")
-                }
-                try brightness.set(display, snapshot.value)
+                try brightness.restore(snapshot)
                 restoreGuard?.finish(); restoreGuard = nil
                 self.snapshot = nil
             } catch { self.error = "Could not restore brightness. Use your brightness keys.\n" + error.localizedDescription; return false }
@@ -389,7 +401,7 @@ final class AppModel: ObservableObject {
             // A brightness-key escape restores the screen outside Shade. Adopt that
             // brightness and re-arm auto dim without overwriting the user's choice.
             if isDark, let snapshot, let brightness,
-               let current = try? brightness.get(snapshot.display), current > 0
+               brightness.hasHardwareBrightnessRestored(snapshot)
             {
                 restoreGuard?.finish(); restoreGuard = nil
                 self.snapshot = nil
@@ -403,26 +415,33 @@ final class AppModel: ObservableObject {
 
     private func refreshDisplayState() {
         guard !demo, let brightness else { return }
-        let display = brightness.internalDisplayID()
-        if isClamshell {
-            guard let display else { return }
-            do {
-                _ = try brightness.get(display)
-                if snapshot != nil, !restore() { return }
-                now = Date()
-                session.displayDidReturn(now: now, delay: delay)
+        let displays = Set(brightness.onlineDisplayIDs())
+        guard displays != knownDisplayIDs else {
+            if !isOn, snapshot != nil, !displays.isEmpty, restore() {
                 error = nil
-            } catch {
-                self.error = error.localizedDescription
             }
             return
         }
-        if isOn, display == nil, ClamshellState.isClosed() {
+        knownDisplayIDs = displays
+        if isClamshell {
+            guard !displays.isEmpty else { return }
+            if snapshot != nil, !restore() { return }
+            now = Date()
+            session.displayDidReturn(now: now, delay: delay)
+            error = nil
+            return
+        }
+        if isOn, displays.isEmpty, ClamshellState.isClosed() {
             editingDelay = false
             session.enterClamshell()
             return
         }
-        if !isOn, snapshot != nil, display != nil, restore() {
+        if isOn {
+            if snapshot != nil, !restore() { return }
+            now = Date()
+            session.reserve(now: now, delay: delay)
+            error = nil
+        } else if snapshot != nil, !displays.isEmpty, restore() {
             error = nil
         }
     }
