@@ -138,7 +138,7 @@ final class AppModel: ObservableObject {
         switch session.phase {
         case .off: return waitingForPower ? "Waiting for power adapter" : (blockedByPower ? "Needs a power adapter" : "Ready to dim")
         case .pending: let t = session.remaining(now: now); return String(format: "Dimming in %d:%02d", t / 60, t % 60)
-        case .dark: return "All displays dimmed"
+        case .dark: return "Physical displays dimmed"
         case .clamshell: return "Clamshell mode"
         }
     }
@@ -241,9 +241,9 @@ final class AppModel: ObservableObject {
         do {
             if !demo {
                 let service = try Brightness()
-                let displays = service.onlineDisplayIDs()
+                let displays = service.physicalDisplayIDs()
                 if displays.isEmpty, !ClamshellState.isClosed() {
-                    throw ShadeFailure(message: "No online display found.")
+                    throw ShadeFailure(message: "No physical display found.")
                 }
                 brightness = service
                 knownDisplayIDs = Set(displays)
@@ -252,7 +252,7 @@ final class AppModel: ObservableObject {
             }
             now = Date()
             enabledAt = now
-            if !demo, brightness?.onlineDisplayIDs().isEmpty == true {
+            if !demo, brightness?.physicalDisplayIDs().isEmpty == true {
                 session.enableClamshell()
             } else {
                 session.enable(now: now, delay: delay)
@@ -314,7 +314,7 @@ final class AppModel: ObservableObject {
                     session.enterClamshell()
                     return
                 }
-                throw ShadeFailure(message: "No online display found.")
+                throw ShadeFailure(message: "No physical display found.")
             }
             let guardian = RestoreGuard()
             try guardian.start(snapshots: originals)
@@ -415,7 +415,7 @@ final class AppModel: ObservableObject {
 
     private func refreshDisplayState() {
         guard !demo, let brightness else { return }
-        let displays = Set(brightness.onlineDisplayIDs())
+        let displays = Set(brightness.physicalDisplayIDs())
         guard displays != knownDisplayIDs else {
             if !isOn, snapshot != nil, !displays.isEmpty, restore() {
                 error = nil

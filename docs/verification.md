@@ -50,3 +50,12 @@ The user's physical both-Shift hold and custom shortcut activation have not yet 
 - The requested helper sentence is absent from the app and accepted timer mock. The older full-state mock links to the accepted timer interaction.
 - App-model tests use a unique UserDefaults suite and demo setup: confirmed values persist and reload, invalid values leave the timer untouched, same-duration confirmation restarts the countdown, and changes while off/dark do not enable or restore the display. Core tests cover all 60 stored values, invalid stored settings, and the new countdown deadline.
 - Native UI inspection was attempted with a dedicated temporary demo bundle; the Computer Use service timed out. Visual layout, native clicks, and physical Escape delivery remain unverified. No display dimming or installed-app replacement was performed for this change.
+
+
+## External-only and physical-display dimming (2026-09-21)
+
+- The implementation targets every online physical display while leaving virtual outputs unchanged. Built-in panels retain the DisplayServices brightness path; external panels save and restore their complete CoreGraphics RGB transfer tables. Outputs with missing EDID vendor or model identifiers are treated as virtual and excluded; public CoreGraphics APIs cannot reliably distinguish a virtual driver that spoofs physical-looking EDID values.
+- Required check passed: 31 Swift tests, a production app build and signature validation, and 20 real guard disarm/exit cycles with no display changes.
+- Live external-only setup: one active non-built-in display (CoreGraphics display 2, vendor 2533, model 4224) with the built-in panel disconnected. Dim Now produced a 1024-sample all-zero RGB transfer table while the Shade UI and Computer Use capture remained available. Restore Displays returned to the countdown and restored a non-black table.
+- Crash recovery: after a second live dim, only the Shade parent was sent SIGKILL. The companion restored the external display to a non-black 1024-sample table and then exited.
+- A second simultaneous physical display was not connected during this session, so the all-target behavior is code-tested but still needs a live two-or-more-display acceptance pass. Hot-plug handling is implemented through display-topology polling but was not exercised live in this session.

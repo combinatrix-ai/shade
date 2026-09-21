@@ -503,11 +503,11 @@ footer{margin-top:70px;padding-top:22px;border-top:1px solid var(--line);font-si
     </li>
     <li>
       <b>Clamshell mode keeps the Mac awake without a display target<span class="tag same">approved</span></b>
-      <p><code>IOPMrootDomain</code> の lid state を参照し、online display が 0 台でも蓋が閉じていれば ON にできる。display が現れると通常の暗転カウントダウンを開始する。</p>
+      <p><code>IOPMrootDomain</code> の lid state を参照し、online physical display が 0 台でも蓋が閉じていれば ON にできる。物理displayが現れると通常の暗転カウントダウンを開始する。</p>
     </li>
     <li>
-      <b>Every online display dims together<span class="tag same">approved</span></b>
-      <p>内蔵だけでなく外部・仮想displayも同じ暗転対象にする。native brightnessを使えるdisplayは輝度0、使えないdisplayはgamma tableを0へ落とす。黒いwindowは重ねず、Computer Useがdesktopを読み続けられる構成にする。</p>
+      <b>Every online physical display dims together; virtual displays remain unchanged<span class="tag same">approved</span></b>
+      <p>内蔵と外部の物理displayを同じ暗転対象にし、仮想displayは変更しない。native brightnessを使えるdisplayは輝度0、使えない物理displayはgamma tableを0へ落とす。黒いwindowは重ねず、Computer Useがdesktopを読み続けられる構成にする。</p>
     </li>
   </ol>
   <div class="box" style="margin-top:22px">
@@ -530,7 +530,7 @@ footer{margin-top:70px;padding-top:22px;border-top:1px solid var(--line);font-si
       <tr><td>Off</td><td>Battery</td><td>off</td><td>off, enabled</td><td>OFF · Auto-Lock after 10 min</td><td>Ready to dim</td><td><code>Turn On</code></td></tr>
       <tr><td>On</td><td>AC</td><td>on/off</td><td>on, green</td><td>ON · Auto-Lock Prevented</td><td>Dimming in m:ss</td><td><code>Dim Now</code></td></tr>
       <tr><td>On</td><td>AC · lid closed</td><td>on/off</td><td>on, green</td><td>ON · Auto-Lock Prevented</td><td>Clamshell mode</td><td><code>Turn Off</code></td></tr>
-      <tr><td>On</td><td>AC</td><td>on/off</td><td>on, green</td><td>ON · Auto-Lock Prevented</td><td>All displays dimmed</td><td><code>Restore Displays</code></td></tr>
+      <tr><td>On</td><td>AC</td><td>on/off</td><td>on, green</td><td>ON · Auto-Lock Prevented</td><td>Physical displays dimmed</td><td><code>Restore Displays</code></td></tr>
       <tr><td>On</td><td>Battery</td><td>on</td><td>on, <b>amber</b></td><td>ON · Auto-Lock after 10 min</td><td>Waiting for power adapter</td><td><code>Turn Off</code> (cancels auto-resume)</td></tr>
       <tr><td>On</td><td>Battery</td><td>off</td><td>on, green</td><td>ON · Auto-Lock Prevented</td><td>Dimming in m:ss</td><td><code>Dim Now</code></td></tr>
     </tbody>
@@ -616,7 +616,7 @@ function mainPage(s){
 
   const headline =
       d.active && s.clamshell ? "Clamshell mode"
-    : d.dimmed  ? "All displays dimmed"
+    : d.dimmed  ? "Physical displays dimmed"
     : d.armed   ? "Dimming in " + fmt(s.remaining)
     : d.paused  ? "Waiting for power adapter"
     : d.blocked ? "Needs a power adapter"
@@ -789,12 +789,12 @@ const SCREENS = [
 
   { id:"clamshell", t:"On · clamshell mode",
     s:"Sleep prevention stays active while the built-in display is offline.",
-    ja:"蓋を閉じて online display が0台でもエラーにせず、<b>スリープ防止を継続</b>する。外部・仮想displayが現れると通常の暗転カウントダウンへ移る。",
+    ja:"蓋を閉じて online physical display が0台でもエラーにせず、<b>スリープ防止を継続</b>する。物理displayが現れると通常の暗転カウントダウンへ移る。仮想displayは暗転対象にしない。",
     st:{intent:true, clamshell:true} },
 
   { id:"dimmed", t:"Dimmed · restore available",
-    s:"Every online display is dark, Mac awake, Computer Use continues.",
-    ja:"内蔵・外部・仮想displayの暗転中。主ボタンは「Restore Displays」。復帰キーだけを短く表示する。",
+    s:"Every online physical display is dark, virtual displays unchanged, Mac awake, Computer Use continues.",
+    ja:"内蔵・外部の物理displayの暗転中。仮想displayは変更しない。主ボタンは「Restore Displays」。復帰キーだけを短く表示する。",
     st:{intent:true, phase:"dimmed"} },
 
   { id:"dimmed-ignore", t:"Dimmed · Wake on touch",
@@ -963,7 +963,7 @@ function dimNow(){
   if (!derive(P).armed) return;
   P.phase = "dimmed";
   P.ignore = 2;
-  log("All displays dimmed");
+  log("Physical displays dimmed");
   render();
 }
 function restore(reason){

@@ -1,8 +1,8 @@
 # Shade
 
-**A band-aid for the Computer Use era. Darken the displays while the agent keeps working.**
+**A band-aid for the Computer Use era. Darken the physical displays while the agent keeps working.**
 
-Shade is a small macOS menu bar app that keeps the Mac awake while dimming every online display. The desktop stays available to Computer Use, without leaving screens lit throughout an unattended agent session. Think of it as an Amphetamine-like utility for a Mac that an agent is still using after its human has stepped away.
+Shade is a small macOS menu bar app that keeps the Mac awake while dimming every online physical display. Virtual displays remain unchanged so they can continue serving as an agent workspace. The desktop stays available to Computer Use, without leaving physical screens lit throughout an unattended agent session. Think of it as an Amphetamine-like utility for a Mac that an agent is still using after its human has stepped away.
 
 ## Why a band-aid?
 
@@ -18,8 +18,8 @@ We expect this kind of separation between an agent's working session and the phy
 
 - **Only on power adapter** defaults on. Unplugging restores brightness and pauses Shade, releasing its sleep-prevention assertions. Reconnecting resumes the session with a fresh dimming countdown. Turning Shade off while paused cancels automatic resume. Sleep, switching user sessions, or quitting also cancels it. Turn this setting off to use Shade on battery.
 - Starts off. Double-click or right-click the menu bar icon to toggle wake prevention. A single click opens the panel after the system double-click interval.
-- After 1 minute without hardware input (configurable: 1–60 minutes, in whole minutes), dims every online display together. Shade uses native brightness where the display exposes it and a zeroed gamma table otherwise, including for software and virtual displays. Physical keyboard and pointer activity postpone dimming while displays are visible.
-- With the lid closed on power adapter and no online display, Shade enters **Clamshell mode**: it keeps the Mac awake without requiring a display target. Connecting an external or virtual display, or opening the lid, starts a fresh dimming countdown and includes every online display in the next dim.
+- After 1 minute without hardware input (configurable: 1–60 minutes, in whole minutes), dims every online physical display together. Shade uses native brightness where the display exposes it and a zeroed gamma table otherwise. Physical keyboard and pointer activity postpone dimming while displays are visible. Virtual displays remain unchanged.
+- With the lid closed on power adapter and no online physical display, Shade enters **Clamshell mode**: it keeps the Mac awake without requiring a display target. Connecting a physical display, or opening the lid, starts a fresh dimming countdown and includes every online physical display in the next dim.
 - Click **Dimming in m:ss** to choose a delay using the slider, minute field, or presets. **Set timer** restarts the countdown from that moment and saves the delay for future sessions; **Cancel** or Escape discards the edit. The same control is available under **Settings → Dim after**.
 - Press **Control + Option + Command + D** to restore every display. Keeping the Mac awake continues.
 - Restoring displays automatically starts a fresh dimming countdown. The shortcut restarts that countdown while visible. If at least one display uses native brightness, the brightness-up key also restores every display and preserves the brightness you chose. Gamma-only sessions use the Shade shortcut. With **Wake on touch** enabled, physical trackpad movement, mouse activity, or typing restores every display and starts a fresh countdown. It defaults off; resting a finger without generating input is not detected.
@@ -60,15 +60,15 @@ Demo mode previews the native interface without controlling brightness or power.
 
 ## Recovery and boundaries
 
-The original native brightness or RGB gamma table is read for every online display immediately before each dim. Before changing any display, Shade starts a companion process and waits for it to confirm that it captured every recovery value. On a crash, the pipe closes and the companion restores every display. On normal restoration, the parent restores the saved values and sends an explicit disarm message; the UI never waits for child exit.
+The original native brightness or RGB gamma table is read for every online physical display immediately before each dim. Before changing any display, Shade starts a companion process and waits for it to confirm that it captured every recovery value. On a crash, the pipe closes and the companion restores every target display. On normal restoration, the parent restores the saved values and sends an explicit disarm message; the UI never waits for child exit.
 
-Native brightness control uses the private macOS `DisplayServices` framework because macOS does not expose a suitable public brightness API. Displays without native control use the public Core Graphics gamma-table APIs instead. Availability is checked per display and dimming fails closed before changing anything if any online display supports neither route. Future OS updates can require maintenance. No screen overlay, simulated user input, display disconnect, screenshot, or persistent lock-setting change is used.
+Native brightness control uses the private macOS `DisplayServices` framework because macOS does not expose a suitable public brightness API. Physical displays without native control use the public Core Graphics gamma-table APIs instead. Availability is checked per display and dimming fails closed before changing anything if any target supports neither route. External outputs without both EDID vendor and model identifiers are treated as virtual and excluded; a virtual driver that deliberately reports physical-looking EDID identifiers cannot be distinguished through this public API. Future OS updates and unusual display adapters can require maintenance. No screen overlay, simulated user input, display disconnect, screenshot, or persistent lock-setting change is used.
 
-Dimming is not a security boundary; anyone can restore a display. Gamma-table dimming is software dimming and does not turn off an external display's backlight. Clamshell mode with no online displays holds sleep-prevention assertions only. macOS applies the system-sleep assertion on AC power; lid-closed use on battery is not supported. Automatic brightness behavior and sleep overrides may vary with hardware or managed-device policy; verify on the target Mac.
+Dimming is not a security boundary; anyone can restore a display. Gamma-table dimming is software dimming and does not turn off an external display's backlight. Clamshell mode with no online physical displays holds sleep-prevention assertions only. macOS applies the system-sleep assertion on AC power; lid-closed use on battery is not supported. Automatic brightness behavior and sleep overrides may vary with hardware or managed-device policy; verify on the target Mac.
 
 ## Verification
 
-`swift test` covers timer boundaries, automatic rearming after restore, off-state behavior, explicit timer rescheduling. `./scripts/build.sh` compiles the full app. Live acceptance should additionally check timer-driven dimming, normal input staying dark, global shortcut restoration, normal quit, and crash restoration. Do not infer live acceptance from a successful build.
+`swift test` covers timer boundaries, automatic rearming after restore, off-state behavior, explicit timer rescheduling, and physical-display classification. `./scripts/build.sh` compiles the full app. Live acceptance should additionally check every connected physical display, timer-driven dimming, normal input staying dark, global shortcut restoration, normal quit, and crash restoration. Do not infer live acceptance from a successful build.
 
 See [docs/verification.md](docs/verification.md) for the measured local results and remaining physical checks. Use a stable signing certificate for ongoing distribution.
 

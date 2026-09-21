@@ -37,8 +37,22 @@ final class Brightness {
         return Array(ids.prefix(Int(count)))
     }
 
+    static func isPhysicalDisplay(isBuiltin: Bool, vendor: UInt32, model: UInt32) -> Bool {
+        isBuiltin || (vendor != 0 && model != 0)
+    }
+
+    func physicalDisplayIDs() -> [CGDirectDisplayID] {
+        onlineDisplayIDs().filter { display in
+            Self.isPhysicalDisplay(
+                isBuiltin: CGDisplayIsBuiltin(display) != 0,
+                vendor: CGDisplayVendorNumber(display),
+                model: CGDisplayModelNumber(display)
+            )
+        }
+    }
+
     func snapshots() throws -> [DisplaySnapshot] {
-        try onlineDisplayIDs().map { id in
+        try physicalDisplayIDs().map { id in
             if let value = try? get(id), (try? set(id, value)) != nil {
                 return DisplaySnapshot(id: id, method: .brightness(value))
             }
@@ -47,7 +61,7 @@ final class Brightness {
             {
                 return DisplaySnapshot(id: id, method: .gamma(gamma))
             }
-            throw ShadeFailure(message: "Cannot dim every online display. Display \(id) does not expose brightness or gamma control.")
+            throw ShadeFailure(message: "Cannot dim every physical display. Display \(id) does not expose brightness or gamma control.")
         }
     }
 
